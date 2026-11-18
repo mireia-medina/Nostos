@@ -2441,8 +2441,18 @@ const GRABACION_MAXIMA = 180;         // segundos (decidido por Mireia)
 let contextoAudio = null;
 function audioCtx() {
   if (!contextoAudio) contextoAudio = new (window.AudioContext || window.webkitAudioContext)();
-  if (contextoAudio.state === 'suspended') contextoAudio.resume();
+  if (contextoAudio.state !== 'running' && contextoAudio.state !== 'closed' && !grabandoSonido) contextoAudio.resume().catch(() => {});   // también «interrupted» (iPhone)
   return contextoAudio;
+}
+// Mientras se graba, el sonido del cielo se calla del todo y suelta el altavoz:
+// en el iPhone, si el ambiente sigue sonando, la grabación puede salir vacía o ilegible
+let grabandoSonido = false;
+function sonidoParaGrabar(grabando) {
+  grabandoSonido = grabando;
+  if (typeof apartarAmbiente === 'function') apartarAmbiente(grabando);
+  if (!contextoAudio) return;
+  if (grabando) contextoAudio.suspend().catch(() => {});
+  else if (contextoAudio.state !== 'running') contextoAudio.resume().catch(() => {});
 }
 
 // Medidas de sonido en trocitos de 50 ms (reglas de claude/04_Tonos_fotos_audios_videos.md)
@@ -2516,13 +2526,21 @@ function extensionDe(tipo) {
   return 'audio';
 }
 
-async function prepararAudio(blob) {
+async function prepararAudio(blob, grabado = false) {
   if (blob.size > LIMITE_ARCHIVO) throw new Error('grande');
-  let buffer;
-  try { buffer = await audioCtx().decodeAudioData(await blob.arrayBuffer()); }
-  catch { throw new Error('formato'); }
-  const medidas = medirSonido(buffer);
+  const datos = await blob.arrayBuffer();
   const mime = blob.type || 'audio/mpeg';
+  let buffer = null;
+  for (let intento = 0; intento < 2 && !buffer; intento++) {      // un segundo intento, con el sonido ya despierto
+    try { buffer = await audioCtx().decodeAudioData(datos.slice(0)); }
+    catch { await contextoAudio?.resume().catch(() => {}); await new Promise(r => setTimeout(r, 300)); }
+  }
+  if (!buffer) {
+    if (!grabado) throw new Error('formato');
+    // Una grabación que el navegador no sabe analizar se añade igual: el tono sale del texto y la transcripción
+    return { tipo: 'audio', blob, mime, ext: extensionDe(mime), medidas: null, tonos: [], onda: Array(64).fill(0.3), segundos: null };
+  }
+  const medidas = medirSonido(buffer);
   return { tipo: 'audio', blob, mime, ext: extensionDe(mime), medidas, tonos: tonosDeSonido(medidas),
            onda: ondaDe(buffer), segundos: medidas.segundos };
 }
@@ -2546,6 +2564,7 @@ async function empezarGrabacion() {
     return;
   }
   olvidarPreparado();
+  sonidoParaGrabar(true);
   const camara = formNueva.querySelector('.camara');
   if (conVideo) { camara.srcObject = flujo; camara.hidden = false; camara.play().catch(() => {}); }
   const tipos = conVideo
@@ -2566,13 +2585,14 @@ async function empezarGrabacion() {
     const descartar = grabadora._descartar, eraVideo = grabadora._video;
     const blob = new Blob(trozos, { type: grabadora.mimeType || (eraVideo ? 'video/webm' : 'audio/webm') });
     grabadora = null;
+    sonidoParaGrabar(false);
     pararTranscripcion(descartar);
     actualizarBotonGrabar();
     actualizarCampoTranscripcion();
     if (descartar || !blob.size) return;
     mensajeNueva.textContent = t('preparando_grabacion');
     try {
-      const p = eraVideo ? await prepararVideo(blob) : await prepararAudio(blob);
+      const p = eraVideo ? await prepararVideo(blob) : await prepararAudio(blob, true);
       mostrarPreparado({ ...p, grabado: true }); mensajeNueva.textContent = '';
     } catch { mensajeNueva.textContent = t('no_preparar_grabacion'); }
   };
@@ -3155,6 +3175,7 @@ function mostrarPreparado(p) {
 }
 function cerrarNueva() {
   pararGrabacion(true);
+  if (!grabadora && grabandoSonido) sonidoParaGrabar(false);
   compresion?.cancelar();
   formNueva.hidden = true;
   textoNueva.value = ''; pieNueva.value = '';
