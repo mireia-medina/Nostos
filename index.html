@@ -3646,8 +3646,19 @@ botonSonido.addEventListener('click', () => {
   if (!ambiente) empezarAmbiente(); else volumenAmbiente(sonidoActivo ? 2 : 0.8);
 });
 
-// Empieza con el primer toque, clic o tecla dentro del cielo
-['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { if (cieloActual) empezarAmbiente(); }, true));
+// Empieza con el primer toque, clic o tecla dentro del cielo.
+// En el iPhone, Safari solo deja despertar el sonido al levantar el dedo (touchend / click),
+// no al apoyarlo: por eso se escucha también ahí; si no, el ambiente esperaba a un toque posterior.
+function despertarSonido() {
+  if (!cieloActual) return;
+  empezarAmbiente();
+  if (contextoAudio && contextoAudio.state !== 'running' && contextoAudio.state !== 'closed' && !grabandoSonido) {
+    contextoAudio.resume().catch(() => {});
+    // Truco del iPhone: un sonido vacío dentro del gesto desbloquea la salida de audio al momento
+    try { const b = contextoAudio.createBuffer(1, 1, 22050), f = contextoAudio.createBufferSource(); f.buffer = b; f.connect(contextoAudio.destination); f.start(0); } catch { /* sin más */ }
+  }
+}
+['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, despertarSonido, { capture: true, passive: true }));
 // Con la pestaña en segundo plano, todo calla
 document.addEventListener('visibilitychange', () => {
   if (!ambiente) return;
