@@ -2449,6 +2449,7 @@ function audioCtx() {
 let grabandoSonido = false;
 function sonidoParaGrabar(grabando) {
   grabandoSonido = grabando;
+  if (typeof sesionDeSonido === 'function') sesionDeSonido(grabando ? 'grabar' : 'reproducir');
   if (typeof apartarAmbiente === 'function') apartarAmbiente(grabando);
   if (!contextoAudio) return;
   if (grabando) contextoAudio.suspend().catch(() => {});
@@ -3649,8 +3650,35 @@ botonSonido.addEventListener('click', () => {
 // Empieza con el primer toque, clic o tecla dentro del cielo.
 // En el iPhone, Safari solo deja despertar el sonido al levantar el dedo (touchend / click),
 // no al apoyarlo: por eso se escucha también ahí; si no, el ambiente esperaba a un toque posterior.
+// En el iPhone, el interruptor de silencio apaga el sonido generado por la web. Para que Nóstos suene
+// con el volumen del móvil (aunque el interruptor esté en silencio), se le pide a Safari una sesión
+// de «reproducción», como hacen las apps de música. Con Safari moderno, con navigator.audioSession;
+// con Safari antiguo, con un audio vacío en bucle (las <audio> no respetan el interruptor).
+const ES_IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+let audioVacio = null;
+function wavVacio() {                       // 0,5 s de silencio en WAV, creado aquí mismo (sin archivos)
+  const n = 4000, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+  const txt = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  txt(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); txt(8, 'WAVE'); txt(12, 'fmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, 8000, true);
+  v.setUint32(28, 16000, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); txt(36, 'data'); v.setUint32(40, n * 2, true);
+  return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+}
+function sesionDeSonido(modo) {             // 'reproducir' | 'grabar' | 'parar'
+  if (!ES_IOS) return;
+  if (navigator.audioSession) {
+    const tipo = modo === 'grabar' ? 'play-and-record' : modo === 'reproducir' ? 'playback' : 'auto';
+    try { if (navigator.audioSession.type !== tipo) navigator.audioSession.type = tipo; } catch { /* sin más */ }
+    return;
+  }
+  if (modo === 'reproducir') {
+    if (!audioVacio) { audioVacio = new Audio(wavVacio()); audioVacio.loop = true; audioVacio.setAttribute('playsinline', ''); audioVacio.setAttribute('x-webkit-airplay', 'deny'); }
+    if (audioVacio.paused) audioVacio.play().catch(() => {});
+  } else audioVacio?.pause();
+}
 function despertarSonido() {
   if (!cieloActual) return;
+  if (!grabandoSonido && !document.hidden) sesionDeSonido('reproducir');   // dentro del gesto: así Safari lo permite
   empezarAmbiente();
   if (contextoAudio && contextoAudio.state !== 'running' && contextoAudio.state !== 'closed' && !grabandoSonido) {
     contextoAudio.resume().catch(() => {});
@@ -3661,8 +3689,9 @@ function despertarSonido() {
 ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, despertarSonido, { capture: true, passive: true }));
 // Con la pestaña en segundo plano, todo calla
 document.addEventListener('visibilitychange', () => {
+  if (document.hidden) sesionDeSonido('parar');
   if (!ambiente) return;
-  if (document.hidden) ambiente.ctx.suspend(); else ambiente.ctx.resume();
+  if (document.hidden) ambiente.ctx.suspend(); else if (!grabandoSonido) ambiente.ctx.resume();
 });
 
 // ── Volver a una fecha (Paso 13) ─────────────────────────────
