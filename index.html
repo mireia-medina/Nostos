@@ -113,6 +113,23 @@
   .campo:focus { border-color: rgba(255,255,255,0.55); }
 
   /* ── Pantalla de entrada al cielo ── */
+  /* ── Bienvenida: un toque para entrar (y para que el navegador deje sonar el cielo) ── */
+  #bienvenida[hidden] { display: none; }
+  #bienvenida { position: fixed; inset: 0; z-index: 10; width: 100%; border: none; margin: 0; padding: 1.5rem; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.6rem;
+    background: radial-gradient(ellipse at center, rgba(2,3,9,0.15) 0%, rgba(2,3,9,0.6) 75%); color: var(--texto); font: inherit;
+    opacity: 1; transition: opacity 1.4s ease; -webkit-tap-highlight-color: transparent; }
+  #bienvenida.saliendo { opacity: 0; pointer-events: none; }
+  #bienvenida:focus-visible { outline: none; }
+  #bienvenida:focus-visible .toca { outline: 2px solid #ffffff; outline-offset: 4px; }
+  #bienvenida .titulo { font-size: clamp(2.4rem, 8vw, 3.4rem); font-weight: 300; letter-spacing: 0.02em; }
+  #bienvenida .nombre-cielo-bienvenida { font-size: 0.95rem; color: var(--texto-2); }
+  #bienvenida .nombre-cielo-bienvenida:empty { display: none; }
+  #bienvenida .toca { margin-top: 1.6rem; padding: 0.7rem 1.4rem; border-radius: 999px; font-size: 0.95rem; font-weight: 500;
+    background: rgba(255,255,255,0.08); border: 1px solid var(--cristal-borde); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    animation: respirar 4.5s ease-in-out infinite; }
+  @keyframes respirar { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { #bienvenida .toca { animation: none; opacity: 0.9; } }
   #entrada {
     position: fixed; inset: 0; z-index: 10;
     display: flex; align-items: center; justify-content: center;
@@ -506,6 +523,11 @@
 </head>
 <body>
 <canvas id="cielo" tabindex="-1" data-t-aria="cielo_aria" aria-label="Cielo. Arrastra para mirar alrededor; con el teclado, flechas para girar, más y menos para acercarte, y Tab para ir de constelación en constelación."></canvas>
+<button id="bienvenida" type="button" hidden>
+  <span class="titulo">Nóstos</span>
+  <span class="nombre-cielo-bienvenida"></span>
+  <span class="toca"></span>
+</button>
 <section id="entrada" hidden>
   <div class="idiomas cristal" role="group" data-t-aria="idioma" aria-label="Idioma"><button type="button" data-idioma="es" aria-pressed="true">ES</button><button type="button" data-idioma="ca" aria-pressed="false">CA</button><button type="button" data-idioma="en" aria-pressed="false">EN</button></div>
   <form class="cristal" novalidate autocomplete="on">
@@ -746,7 +768,7 @@ const TEXTOS = {
     ayuda_p2: 'No hay prisa. Mira despacio:\nlo que brilla, se abre.',
     secreto_titulo: 'Ninguna forma es casual', secreto_pie: 'Escúchalas: cada una suena distinto.',
     leyenda: [['Alegría', 'se abre.'], ['Nostalgia', 'vuelve, sin llegar.'], ['Calma', 'se tiende.'], ['Amor', 'se cierra sobre sí.'], ['Energía', 'sube.'], ['Tristeza', 'cae, y se apaga al final.'], ['Sin tono', 'busca su camino.'], ['Dos a la vez', 'se dan la mano.']],
-    album: 'Álbum', album_vacio: 'Este cielo aún no tiene constelaciones.', descargando: (i, n) => `Preparando la descarga… ${i} de ${n}`, descarga_lista: 'Descarga lista. El archivo index.html del ZIP se abre sin internet.', guardar_cielo: 'Guardar el cielo', carta_titulo: 'Carta celeste', carta_desc: 'Imprime o guarda en PDF el mapa de este cielo, con el sol y las nubes que tengas elegidos ahora.', contenido_titulo: 'Todo el contenido', contenido_desc: 'Un ZIP con las frases, fotos, audios y vídeos, y un diario que se abre sin internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constelación' : n + ' constelaciones'}, ${m < 1 ? 'menos de 1 MB' : 'unos ' + Math.round(m) + ' MB'})`, dormido: 'El cielo está dormido: el proyecto de Supabase se pausa tras una semana sin uso. Hay que reactivarlo desde el panel de Supabase y volver a cargar la página.', en_partes: (n) => `, en ${n} partes`, parte_titulo: (i, n) => `Parte ${i} de ${n}`, parte_archivo: 'parte', de_archivo: 'de', menos_1mb: 'menos de 1 MB', unos_mb: (m) => `unos ${m} MB`, descargada: '✓ Descargada', parte_lista: (i, n) => `Parte ${i} de ${n} descargada.`, partes_intro: 'Este cielo es grande, así que se descarga en partes. Toca cada una para descargarla; en cada ZIP hay un diario con lo suyo.', bloqueado: 'Demasiados intentos con una contraseña incorrecta. Espera 10 minutos y vuelve a probar.', nota_sol: 'Se imprime con el sol y las nubes que tengas elegidos ahora. Para cambiarlos, ciérrala y usa la hora y las nubes de arriba a la derecha.', derechos: 'Todos los derechos reservados', transcripcion: 'Transcripción', transcripcion_ph: 'Transcripción (opcional): escribe o pega lo que se dice', transcripcion_ph_grabar: 'Transcripción: habla y aparecerá aquí. Después puedes corregirla.', leer_transcripcion: 'Leer la transcripción', locale: 'es-ES', idioma: 'Idioma',
+    album: 'Álbum', album_vacio: 'Este cielo aún no tiene constelaciones.', descargando: (i, n) => `Preparando la descarga… ${i} de ${n}`, descarga_lista: 'Descarga lista. El archivo index.html del ZIP se abre sin internet.', guardar_cielo: 'Guardar el cielo', carta_titulo: 'Carta celeste', carta_desc: 'Imprime o guarda en PDF el mapa de este cielo, con el sol y las nubes que tengas elegidos ahora.', contenido_titulo: 'Todo el contenido', contenido_desc: 'Un ZIP con las frases, fotos, audios y vídeos, y un diario que se abre sin internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constelación' : n + ' constelaciones'}, ${m < 1 ? 'menos de 1 MB' : 'unos ' + Math.round(m) + ' MB'})`, dormido: 'El cielo está dormido: el proyecto de Supabase se pausa tras una semana sin uso. Hay que reactivarlo desde el panel de Supabase y volver a cargar la página.', en_partes: (n) => `, en ${n} partes`, parte_titulo: (i, n) => `Parte ${i} de ${n}`, parte_archivo: 'parte', de_archivo: 'de', menos_1mb: 'menos de 1 MB', unos_mb: (m) => `unos ${m} MB`, descargada: '✓ Descargada', parte_lista: (i, n) => `Parte ${i} de ${n} descargada.`, partes_intro: 'Este cielo es grande, así que se descarga en partes. Toca cada una para descargarla; en cada ZIP hay un diario con lo suyo.', bloqueado: 'Demasiados intentos con una contraseña incorrecta. Espera 10 minutos y vuelve a probar.', nota_sol: 'Se imprime con el sol y las nubes que tengas elegidos ahora. Para cambiarlos, ciérrala y usa la hora y las nubes de arriba a la derecha.', derechos: 'Todos los derechos reservados', transcripcion: 'Transcripción', transcripcion_ph: 'Transcripción (opcional): escribe o pega lo que se dice', transcripcion_ph_grabar: 'Transcripción: habla y aparecerá aquí. Después puedes corregirla.', leer_transcripcion: 'Leer la transcripción', toca_entrar: 'Toca para entrar', clic_entrar: 'Haz clic para entrar', locale: 'es-ES', idioma: 'Idioma',
     entrar_modo: 'Entrar en un cielo', crear_modo: 'Crear un cielo', entrar_o_crear: 'Entrar o crear',
     nombre_cielo: 'Nombre del cielo', contrasena: 'Contraseña',
     mostrar_clave: 'Mostrar la contraseña', ocultar_clave: 'Ocultar la contraseña', repite: 'Repite la contraseña',
@@ -810,7 +832,7 @@ const TEXTOS = {
     ayuda_p2: 'No hi ha pressa. Mira a poc a poc:\nel que brilla, s’obre.',
     secreto_titulo: 'Cap forma és casual', secreto_pie: 'Escolta-les: cada una sona diferent.',
     leyenda: [['Alegria', 's’obre.'], ['Nostàlgia', 'torna, sense arribar.'], ['Calma', 's’estén.'], ['Amor', 'es tanca sobre si.'], ['Energia', 'puja.'], ['Tristesa', 'cau, i s’apaga al final.'], ['Sense to', 'busca el seu camí.'], ['Dos alhora', 'es donen la mà.']],
-    album: 'Àlbum', album_vacio: 'Aquest cel encara no té constel·lacions.', descargando: (i, n) => `Preparant la descàrrega… ${i} de ${n}`, descarga_lista: 'Descàrrega a punt. El fitxer index.html del ZIP s’obre sense internet.', guardar_cielo: 'Desa el cel', carta_titulo: 'Carta celeste', carta_desc: 'Imprimeix o desa en PDF el mapa d’aquest cel, amb el sol i els núvols que tinguis triats ara.', contenido_titulo: 'Tot el contingut', contenido_desc: 'Un ZIP amb les frases, fotos, àudios i vídeos, i un diari que s’obre sense internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constel·lació' : n + ' constel·lacions'}, ${m < 1 ? 'menys d’1 MB' : 'uns ' + Math.round(m) + ' MB'})`, dormido: 'El cel està adormit: el projecte de Supabase es posa en pausa després d’una setmana sense ús. Cal reactivar-lo des del tauler de Supabase i tornar a carregar la pàgina.', en_partes: (n) => `, en ${n} parts`, parte_titulo: (i, n) => `Part ${i} de ${n}`, parte_archivo: 'part', de_archivo: 'de', menos_1mb: 'menys d’1 MB', unos_mb: (m) => `uns ${m} MB`, descargada: '✓ Descarregada', parte_lista: (i, n) => `Part ${i} de ${n} descarregada.`, partes_intro: 'Aquest cel és gran, així que es descarrega en parts. Toca cada una per descarregar-la; a cada ZIP hi ha un diari amb el seu contingut.', bloqueado: 'Massa intents amb una contrasenya incorrecta. Espera 10 minuts i torna-ho a provar.', nota_sol: 'S’imprimeix amb el sol i els núvols que tinguis triats ara. Per canviar-los, tanca-la i fes servir l’hora i els núvols de dalt a la dreta.', derechos: 'Tots els drets reservats', transcripcion: 'Transcripció', transcripcion_ph: 'Transcripció (opcional): escriu o enganxa el que es diu', transcripcion_ph_grabar: 'Transcripció: parla i apareixerà aquí. Després la pots corregir.', leer_transcripcion: 'Llegeix la transcripció', locale: 'ca-ES', idioma: 'Idioma',
+    album: 'Àlbum', album_vacio: 'Aquest cel encara no té constel·lacions.', descargando: (i, n) => `Preparant la descàrrega… ${i} de ${n}`, descarga_lista: 'Descàrrega a punt. El fitxer index.html del ZIP s’obre sense internet.', guardar_cielo: 'Desa el cel', carta_titulo: 'Carta celeste', carta_desc: 'Imprimeix o desa en PDF el mapa d’aquest cel, amb el sol i els núvols que tinguis triats ara.', contenido_titulo: 'Tot el contingut', contenido_desc: 'Un ZIP amb les frases, fotos, àudios i vídeos, i un diari que s’obre sense internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constel·lació' : n + ' constel·lacions'}, ${m < 1 ? 'menys d’1 MB' : 'uns ' + Math.round(m) + ' MB'})`, dormido: 'El cel està adormit: el projecte de Supabase es posa en pausa després d’una setmana sense ús. Cal reactivar-lo des del tauler de Supabase i tornar a carregar la pàgina.', en_partes: (n) => `, en ${n} parts`, parte_titulo: (i, n) => `Part ${i} de ${n}`, parte_archivo: 'part', de_archivo: 'de', menos_1mb: 'menys d’1 MB', unos_mb: (m) => `uns ${m} MB`, descargada: '✓ Descarregada', parte_lista: (i, n) => `Part ${i} de ${n} descarregada.`, partes_intro: 'Aquest cel és gran, així que es descarrega en parts. Toca cada una per descarregar-la; a cada ZIP hi ha un diari amb el seu contingut.', bloqueado: 'Massa intents amb una contrasenya incorrecta. Espera 10 minuts i torna-ho a provar.', nota_sol: 'S’imprimeix amb el sol i els núvols que tinguis triats ara. Per canviar-los, tanca-la i fes servir l’hora i els núvols de dalt a la dreta.', derechos: 'Tots els drets reservats', transcripcion: 'Transcripció', transcripcion_ph: 'Transcripció (opcional): escriu o enganxa el que es diu', transcripcion_ph_grabar: 'Transcripció: parla i apareixerà aquí. Després la pots corregir.', leer_transcripcion: 'Llegeix la transcripció', toca_entrar: 'Toca per entrar', clic_entrar: 'Fes clic per entrar', locale: 'ca-ES', idioma: 'Idioma',
     entrar_modo: 'Entrar en un cel', crear_modo: 'Crear un cel', entrar_o_crear: 'Entrar o crear',
     nombre_cielo: 'Nom del cel', contrasena: 'Contrasenya',
     mostrar_clave: 'Mostra la contrasenya', ocultar_clave: 'Amaga la contrasenya', repite: 'Repeteix la contrasenya',
@@ -874,7 +896,7 @@ const TEXTOS = {
     ayuda_p2: 'There’s no hurry. Look slowly:\nwhat shines, opens.',
     secreto_titulo: 'No shape is an accident', secreto_pie: 'Listen: each one sounds different.',
     leyenda: [['Joy', 'opens.'], ['Nostalgia', 'returns, never arriving.'], ['Calm', 'lies down.'], ['Love', 'closes on itself.'], ['Energy', 'rises.'], ['Sadness', 'falls, and fades at the end.'], ['No tone', 'finds its own way.'], ['Two at once', 'hold hands.']],
-    album: 'Album', album_vacio: 'This sky has no constellations yet.', descargando: (i, n) => `Preparing the download… ${i} of ${n}`, descarga_lista: 'Download ready. The index.html file in the ZIP opens without internet.', guardar_cielo: 'Save the sky', carta_titulo: 'Star chart', carta_desc: 'Print this sky’s map or save it as a PDF, with the sun and clouds you have chosen right now.', contenido_titulo: 'Everything', contenido_desc: 'A ZIP with the phrases, photos, audio and videos, plus a journal that opens without internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constellation' : n + ' constellations'}, ${m < 1 ? 'under 1 MB' : 'about ' + Math.round(m) + ' MB'})`, dormido: 'The sky is asleep: the Supabase project pauses after a week without use. Reactivate it from the Supabase dashboard and reload the page.', en_partes: (n) => `, in ${n} parts`, parte_titulo: (i, n) => `Part ${i} of ${n}`, parte_archivo: 'part', de_archivo: 'of', menos_1mb: 'under 1 MB', unos_mb: (m) => `about ${m} MB`, descargada: '✓ Downloaded', parte_lista: (i, n) => `Part ${i} of ${n} downloaded.`, partes_intro: 'This sky is large, so it downloads in parts. Tap each one to download it; every ZIP has a journal with its own content.', bloqueado: 'Too many attempts with a wrong password. Wait 10 minutes and try again.', nota_sol: 'It prints with the sun and clouds you have chosen right now. To change them, close this and use the time and clouds at the top right.', derechos: 'All rights reserved', transcripcion: 'Transcript', transcripcion_ph: 'Transcript (optional): type or paste what is said', transcripcion_ph_grabar: 'Transcript: speak and it will appear here. You can correct it afterwards.', leer_transcripcion: 'Read the transcript', locale: 'en-GB', idioma: 'Language',
+    album: 'Album', album_vacio: 'This sky has no constellations yet.', descargando: (i, n) => `Preparing the download… ${i} of ${n}`, descarga_lista: 'Download ready. The index.html file in the ZIP opens without internet.', guardar_cielo: 'Save the sky', carta_titulo: 'Star chart', carta_desc: 'Print this sky’s map or save it as a PDF, with the sun and clouds you have chosen right now.', contenido_titulo: 'Everything', contenido_desc: 'A ZIP with the phrases, photos, audio and videos, plus a journal that opens without internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constellation' : n + ' constellations'}, ${m < 1 ? 'under 1 MB' : 'about ' + Math.round(m) + ' MB'})`, dormido: 'The sky is asleep: the Supabase project pauses after a week without use. Reactivate it from the Supabase dashboard and reload the page.', en_partes: (n) => `, in ${n} parts`, parte_titulo: (i, n) => `Part ${i} of ${n}`, parte_archivo: 'part', de_archivo: 'of', menos_1mb: 'under 1 MB', unos_mb: (m) => `about ${m} MB`, descargada: '✓ Downloaded', parte_lista: (i, n) => `Part ${i} of ${n} downloaded.`, partes_intro: 'This sky is large, so it downloads in parts. Tap each one to download it; every ZIP has a journal with its own content.', bloqueado: 'Too many attempts with a wrong password. Wait 10 minutes and try again.', nota_sol: 'It prints with the sun and clouds you have chosen right now. To change them, close this and use the time and clouds at the top right.', derechos: 'All rights reserved', transcripcion: 'Transcript', transcripcion_ph: 'Transcript (optional): type or paste what is said', transcripcion_ph_grabar: 'Transcript: speak and it will appear here. You can correct it afterwards.', leer_transcripcion: 'Read the transcript', toca_entrar: 'Tap to enter', clic_entrar: 'Click to enter', locale: 'en-GB', idioma: 'Language',
     entrar_modo: 'Enter a sky', crear_modo: 'Create a sky', entrar_o_crear: 'Enter or create',
     nombre_cielo: 'Sky name', contrasena: 'Password',
     mostrar_clave: 'Show password', ocultar_clave: 'Hide password', repite: 'Repeat the password',
@@ -2242,7 +2264,34 @@ function mostrarEntrada() {
   (g?.nombre ? campo('contrasena') : campo('cielo')).focus({ preventScroll: true });
 }
 
+// Un toque (o clic, o Intro) desbloquea el sonido: los navegadores no dejan sonar una web sin él.
+// Se hace dentro del gesto; el ambiente empieza solo unos 3 s después de entrar (Paso 20).
+function prepararSonido() {
+  try {
+    sesionDeSonido('reproducir');
+    const c = audioCtx();
+    const b = c.createBuffer(1, 1, 22050), f = c.createBufferSource(); f.buffer = b; f.connect(c.destination); f.start(0);
+  } catch { /* sin más: sonará con el primer toque en el cielo */ }
+}
+const bienvenida = document.getElementById('bienvenida');
+function mostrarBienvenida(g) {
+  bienvenida.querySelector('.nombre-cielo-bienvenida').textContent = g.nombre || '';
+  bienvenida.querySelector('.toca').textContent = t(window.matchMedia('(pointer: coarse)').matches ? 'toca_entrar' : 'clic_entrar');
+  bienvenida.setAttribute('aria-label', `Nóstos · ${g.nombre || ''} · ${t('toca_entrar')}`);
+  bienvenida.hidden = false;
+  bienvenida.focus({ preventScroll: true, focusVisible: false });   // con teclado basta Intro; sin anillo de foco a la vista
+  bienvenida.onclick = () => {
+    bienvenida.onclick = null;
+    prepararSonido();
+    bienvenida.classList.add('saliendo');
+    setTimeout(() => { bienvenida.hidden = true; bienvenida.classList.remove('saliendo'); }, 1400);
+    entrarEnElCielo(g);
+  };
+}
+let temporizadorAmbiente = null;
 function entrarEnElCielo(datos) {
+  clearTimeout(temporizadorAmbiente);
+  temporizadorAmbiente = setTimeout(() => { if (cieloActual) empezarAmbiente(); }, 3000);   // el ambiente, unos 3 s después de entrar
   cieloActual = datos;
   guardar(datos);
   pantalla.classList.add('saliendo');
@@ -2281,6 +2330,7 @@ botonVer.addEventListener('click', () => {
 
 formEntrada.addEventListener('submit', async (e) => {
   e.preventDefault();
+  prepararSonido();               // pulsar «Entrar» ya es el toque que deja sonar el cielo
   const cielo = campo('cielo').value.trim();
   const contrasena = campo('contrasena').value;
   const autor = campo('autor').value.trim();
@@ -2317,7 +2367,7 @@ formEntrada.addEventListener('submit', async (e) => {
     const { data: { session } } = await conLimite(supabase.auth.getSession(), 8000);
     if (g?.id && g?.autor && session) {
       const { data, error } = await conLimite(supabase.from('miembros').select('cielo_id').eq('cielo_id', g.id).maybeSingle(), 8000);
-      if (!error && data) { entrarEnElCielo(g); return; }
+      if (!error && data) { mostrarBienvenida(g); return; }
     }
   } catch {}
   mostrarEntrada();
