@@ -445,7 +445,7 @@
   #dialogo-carta .vista-carta { width: min(11rem, 45vw); aspect-ratio: 1000 / 1414; border-radius: 8px; overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,0.35); }
   #dialogo-carta .vista-carta svg { width: 100%; height: 100%; display: block; }
   #dialogo-carta .nota-carta { margin: 0; font-size: 0.82rem; color: var(--texto-2); line-height: 1.45; }
-  #dialogo-carta .botones { display: flex; gap: 0.5rem; align-items: center; }
+  #dialogo-carta .botones, #dialogo-postal .botones { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; justify-content: center; }
   #dialogo-postal[hidden] { display: none; }
   #dialogo-postal { position: fixed; z-index: 21; left: 50%; top: 50%; transform: translate(-50%, -50%);
     width: min(32rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); overflow-y: auto; box-sizing: border-box;
@@ -693,9 +693,10 @@
     <button type="button" data-estilo="clara" role="radio" aria-checked="false" data-t="clara">Clara</button>
   </div>
   <p class="nota-carta" data-t="nota_sol">Se imprime con el sol y las nubes que tengas elegidos ahora. Para cambiarlos, ciérrala y usa la hora y las nubes de arriba a la derecha.</p>
-  <p class="nota-carta" data-t="nota_carta">En la ventana de imprimir puedes elegir A4 o A3, o guardarla como PDF.</p>
+  <p class="nota-carta" data-t="nota_carta">En la ventana de imprimir puedes elegir A4 o A3, o guardarla como PDF. «Guardar imagen» crea un PNG para compartirla o guardarla en tus fotos.</p>
   <div class="botones">
     <button type="button" class="boton principal imprimir-ya" data-t="imprimir">Imprimir</button>
+    <button type="button" class="boton imagen-carta" data-t="guardar_imagen">Guardar imagen</button>
     <button type="button" class="enlace cancelar" data-t="cancelar">Cancelar</button>
   </div>
 </div>
@@ -711,9 +712,10 @@
     <button type="button" data-formato="horizontal" role="radio" aria-checked="true" data-t="horizontal">Horizontal</button>
     <button type="button" data-formato="vertical" role="radio" aria-checked="false" data-t="vertical">Vertical</button>
   </div>
-  <p class="nota-carta" data-t="nota_postal">Se imprime en A6 (10,5 × 14,8 cm), la medida de una postal. En la ventana de imprimir puedes guardarla como PDF.</p>
+  <p class="nota-carta" data-t="nota_postal">«Imprimir» la saca en A6 (10,5 × 14,8 cm), la medida de una postal, o como PDF. «Guardar imagen» crea un PNG para compartirla o guardarla en tus fotos.</p>
   <div class="botones">
     <button type="button" class="boton principal imprimir-postal" data-t="imprimir">Imprimir</button>
+    <button type="button" class="boton imagen-postal" data-t="guardar_imagen">Guardar imagen</button>
     <button type="button" class="enlace cancelar" data-t="cancelar">Cancelar</button>
   </div>
 </div>
@@ -792,13 +794,13 @@ const TEXTOS = {
     n_const: (n) => n === 1 ? '1 constelación' : `${n} constelaciones`,
     cielo_vacio_fecha: 'Ese día el cielo aún estaba vacío.', fecha_futura: 'Esa fecha aún no ha llegado: el cielo se queda en hoy.',
     fecha_no_valida: 'No reconozco esa fecha. Prueba con «12 agosto 2025», «agosto 2025» o «2025».',
-    fecha_boton: 'Fecha', hora_nubes: 'Hora y nubes', imprimir_carta: 'Imprimir la carta celeste', estilo_carta: 'Estilo', oscura: 'Oscura', clara: 'Clara', imprimir: 'Imprimir', nota_carta: 'En la ventana de imprimir puedes elegir A4 o A3, o guardarla como PDF.', cardinales: ['N', 'E', 'S', 'O'], cambiar_nombre: 'Cambiar el nombre del cielo', nombre_nuevo: 'Nombre nuevo del cielo', guardar: 'Guardar', si_cambiar: 'Sí, cambiar', seguro_nombre: (n) => `¿Seguro que quieres llamarlo «${n}»? Las demás personas tendrán que usar este nombre para entrar desde otro dispositivo.`, nombre_cambiado: (n) => `El cielo ahora se llama «${n}».`, nombre_ocupado: 'Ese nombre ya lo usa otro cielo. Elige otro.', falta_sql_nombre: 'Falta activar esta opción en Supabase (ejecuta el SQL del Paso 15).', carta_pie: 'Carta celeste', sobre: 'Sobre Nóstos', cerrar: 'Cerrar', volver_cara: '↺ Volver',
+    fecha_boton: 'Fecha', hora_nubes: 'Hora y nubes', imprimir_carta: 'Imprimir la carta celeste', estilo_carta: 'Estilo', oscura: 'Oscura', clara: 'Clara', imprimir: 'Imprimir', nota_carta: 'En la ventana de imprimir puedes elegir A4 o A3, o guardarla como PDF. «Guardar imagen» crea un PNG para compartirla o guardarla en tus fotos.', cardinales: ['N', 'E', 'S', 'O'], cambiar_nombre: 'Cambiar el nombre del cielo', nombre_nuevo: 'Nombre nuevo del cielo', guardar: 'Guardar', si_cambiar: 'Sí, cambiar', seguro_nombre: (n) => `¿Seguro que quieres llamarlo «${n}»? Las demás personas tendrán que usar este nombre para entrar desde otro dispositivo.`, nombre_cambiado: (n) => `El cielo ahora se llama «${n}».`, nombre_ocupado: 'Ese nombre ya lo usa otro cielo. Elige otro.', falta_sql_nombre: 'Falta activar esta opción en Supabase (ejecuta el SQL del Paso 15).', carta_pie: 'Carta celeste', sobre: 'Sobre Nóstos', cerrar: 'Cerrar', volver_cara: '↺ Volver',
     ayuda_sub: 'volver a casa', secreto_pregunta: '¿Y si las formas quisieran decir algo?',
     ayuda_p1: 'Los griegos llamaban nóstos al regreso a casa. Este cielo nace para eso: para que las personas que os queréis tengáis un lugar al que volver. Lo que os decís, en palabras, imágenes o voz, se queda aquí convertido en constelación.',
     ayuda_p2: 'No hay prisa. Mira despacio:\nlo que brilla, se abre.',
     secreto_titulo: 'Ninguna forma es casual', secreto_pie: 'Escúchalas: cada una suena distinto.',
     leyenda: [['Alegría', 'se abre.'], ['Nostalgia', 'vuelve, sin llegar.'], ['Calma', 'se tiende.'], ['Amor', 'se cierra sobre sí.'], ['Energía', 'sube.'], ['Tristeza', 'cae, y se apaga al final.'], ['Sin tono', 'busca su camino.'], ['Dos a la vez', 'se dan la mano.']],
-    album: 'Álbum', album_vacio: 'Este cielo aún no tiene constelaciones.', descargando: (i, n) => `Preparando la descarga… ${i} de ${n}`, descarga_lista: 'Descarga lista. El archivo index.html del ZIP se abre sin internet.', guardar_cielo: 'Guardar el cielo', carta_titulo: 'Carta celeste', carta_desc: 'Imprime o guarda en PDF el mapa de este cielo, con el sol y las nubes que tengas elegidos ahora.', contenido_titulo: 'Todo el contenido', contenido_desc: 'Un ZIP con las frases, fotos, audios y vídeos, y un diario que se abre sin internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constelación' : n + ' constelaciones'}, ${m < 1 ? 'menos de 1 MB' : 'unos ' + Math.round(m) + ' MB'})`, dormido: 'El cielo está dormido: el proyecto de Supabase se pausa tras una semana sin uso. Hay que reactivarlo desde el panel de Supabase y volver a cargar la página.', en_partes: (n) => `, en ${n} partes`, parte_titulo: (i, n) => `Parte ${i} de ${n}`, parte_archivo: 'parte', de_archivo: 'de', menos_1mb: 'menos de 1 MB', unos_mb: (m) => `unos ${m} MB`, descargada: '✓ Descargada', parte_lista: (i, n) => `Parte ${i} de ${n} descargada.`, partes_intro: 'Este cielo es grande, así que se descarga en partes. Toca cada una para descargarla; en cada ZIP hay un diario con lo suyo.', bloqueado: 'Demasiados intentos con una contraseña incorrecta. Espera 10 minutos y vuelve a probar.', nota_sol: 'Se imprime con el sol y las nubes que tengas elegidos ahora. Para cambiarlos, ciérrala y usa la hora y las nubes de arriba a la derecha.', derechos: 'Todos los derechos reservados', transcripcion: 'Transcripción', transcripcion_ph: 'Transcripción (opcional): escribe o pega lo que se dice', transcripcion_ph_grabar: 'Transcripción: habla y aparecerá aquí. Después puedes corregirla.', leer_transcripcion: 'Leer la transcripción', toca_entrar: 'Toca para entrar', clic_entrar: 'Haz clic para entrar', guardar_postal: 'Guardar postal', formato: 'Formato', horizontal: 'Horizontal', vertical: 'Vertical', nota_postal: 'Se imprime en A6 (10,5 × 14,8 cm), la medida de una postal. En la ventana de imprimir puedes guardarla como PDF.', postal_pie: 'NÓSTOS · POSTAL', locale: 'es-ES', idioma: 'Idioma',
+    album: 'Álbum', album_vacio: 'Este cielo aún no tiene constelaciones.', descargando: (i, n) => `Preparando la descarga… ${i} de ${n}`, descarga_lista: 'Descarga lista. El archivo index.html del ZIP se abre sin internet.', guardar_cielo: 'Guardar el cielo', carta_titulo: 'Carta celeste', carta_desc: 'Imprime o guarda en PDF el mapa de este cielo, con el sol y las nubes que tengas elegidos ahora.', contenido_titulo: 'Todo el contenido', contenido_desc: 'Un ZIP con las frases, fotos, audios y vídeos, y un diario que se abre sin internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constelación' : n + ' constelaciones'}, ${m < 1 ? 'menos de 1 MB' : 'unos ' + Math.round(m) + ' MB'})`, dormido: 'El cielo está dormido: el proyecto de Supabase se pausa tras una semana sin uso. Hay que reactivarlo desde el panel de Supabase y volver a cargar la página.', en_partes: (n) => `, en ${n} partes`, parte_titulo: (i, n) => `Parte ${i} de ${n}`, parte_archivo: 'parte', de_archivo: 'de', menos_1mb: 'menos de 1 MB', unos_mb: (m) => `unos ${m} MB`, descargada: '✓ Descargada', parte_lista: (i, n) => `Parte ${i} de ${n} descargada.`, partes_intro: 'Este cielo es grande, así que se descarga en partes. Toca cada una para descargarla; en cada ZIP hay un diario con lo suyo.', bloqueado: 'Demasiados intentos con una contraseña incorrecta. Espera 10 minutos y vuelve a probar.', nota_sol: 'Se imprime con el sol y las nubes que tengas elegidos ahora. Para cambiarlos, ciérrala y usa la hora y las nubes de arriba a la derecha.', derechos: 'Todos los derechos reservados', transcripcion: 'Transcripción', transcripcion_ph: 'Transcripción (opcional): escribe o pega lo que se dice', transcripcion_ph_grabar: 'Transcripción: habla y aparecerá aquí. Después puedes corregirla.', leer_transcripcion: 'Leer la transcripción', toca_entrar: 'Toca para entrar', clic_entrar: 'Haz clic para entrar', guardar_postal: 'Guardar postal', formato: 'Formato', horizontal: 'Horizontal', vertical: 'Vertical', nota_postal: '«Imprimir» la saca en A6 (10,5 × 14,8 cm), la medida de una postal, o como PDF. «Guardar imagen» crea un PNG para compartirla o guardarla en tus fotos.', postal_pie: 'NÓSTOS · POSTAL', guardar_imagen: 'Guardar imagen', preparando_imagen: 'Preparando…', imagen_lista: 'Imagen guardada.', imagen_fallo: 'No se ha podido crear la imagen. Prueba con «Imprimir» → «Guardar como PDF».', nombre_carta: 'carta celeste', nombre_postal: 'postal', locale: 'es-ES', idioma: 'Idioma',
     entrar_modo: 'Entrar en un cielo', crear_modo: 'Crear un cielo', entrar_o_crear: 'Entrar o crear',
     nombre_cielo: 'Nombre del cielo', contrasena: 'Contraseña',
     mostrar_clave: 'Mostrar la contraseña', ocultar_clave: 'Ocultar la contraseña', repite: 'Repite la contraseña',
@@ -856,13 +858,13 @@ const TEXTOS = {
     n_const: (n) => n === 1 ? '1 constel·lació' : `${n} constel·lacions`,
     cielo_vacio_fecha: 'Aquell dia el cel encara era buit.', fecha_futura: 'Aquesta data encara no ha arribat: el cel es queda en avui.',
     fecha_no_valida: 'No reconec aquesta data. Prova amb «12 agost 2025», «agost 2025» o «2025».',
-    fecha_boton: 'Data', hora_nubes: 'Hora i núvols', imprimir_carta: 'Imprimeix la carta celeste', estilo_carta: 'Estil', oscura: 'Fosca', clara: 'Clara', imprimir: 'Imprimeix', nota_carta: 'A la finestra d’imprimir pots triar A4 o A3, o desar-la com a PDF.', cardinales: ['N', 'E', 'S', 'O'], cambiar_nombre: 'Canvia el nom del cel', nombre_nuevo: 'Nom nou del cel', guardar: 'Desa', si_cambiar: 'Sí, canvia’l', seguro_nombre: (n) => `Segur que el vols anomenar «${n}»? Les altres persones hauran de fer servir aquest nom per entrar des d’un altre dispositiu.`, nombre_cambiado: (n) => `Ara el cel es diu «${n}».`, nombre_ocupado: 'Aquest nom ja el fa servir un altre cel. Tria’n un altre.', falta_sql_nombre: 'Cal activar aquesta opció a Supabase (executa l’SQL del Pas 15).', carta_pie: 'Carta celeste', sobre: 'Sobre Nóstos', cerrar: 'Tanca', volver_cara: '↺ Torna',
+    fecha_boton: 'Data', hora_nubes: 'Hora i núvols', imprimir_carta: 'Imprimeix la carta celeste', estilo_carta: 'Estil', oscura: 'Fosca', clara: 'Clara', imprimir: 'Imprimeix', nota_carta: 'A la finestra d’imprimir pots triar A4 o A3, o desar-la com a PDF. «Desa la imatge» crea un PNG per compartir-la o desar-la a les teves fotos.', cardinales: ['N', 'E', 'S', 'O'], cambiar_nombre: 'Canvia el nom del cel', nombre_nuevo: 'Nom nou del cel', guardar: 'Desa', si_cambiar: 'Sí, canvia’l', seguro_nombre: (n) => `Segur que el vols anomenar «${n}»? Les altres persones hauran de fer servir aquest nom per entrar des d’un altre dispositiu.`, nombre_cambiado: (n) => `Ara el cel es diu «${n}».`, nombre_ocupado: 'Aquest nom ja el fa servir un altre cel. Tria’n un altre.', falta_sql_nombre: 'Cal activar aquesta opció a Supabase (executa l’SQL del Pas 15).', carta_pie: 'Carta celeste', sobre: 'Sobre Nóstos', cerrar: 'Tanca', volver_cara: '↺ Torna',
     ayuda_sub: 'tornar a casa', secreto_pregunta: 'I si les formes volguessin dir alguna cosa?',
     ayuda_p1: 'Els grecs anomenaven nóstos el retorn a casa. Aquest cel neix per a això: perquè les persones que us estimeu tingueu un lloc on tornar. El que us dieu, en paraules, imatges o veu, es queda aquí convertit en constel·lació.',
     ayuda_p2: 'No hi ha pressa. Mira a poc a poc:\nel que brilla, s’obre.',
     secreto_titulo: 'Cap forma és casual', secreto_pie: 'Escolta-les: cada una sona diferent.',
     leyenda: [['Alegria', 's’obre.'], ['Nostàlgia', 'torna, sense arribar.'], ['Calma', 's’estén.'], ['Amor', 'es tanca sobre si.'], ['Energia', 'puja.'], ['Tristesa', 'cau, i s’apaga al final.'], ['Sense to', 'busca el seu camí.'], ['Dos alhora', 'es donen la mà.']],
-    album: 'Àlbum', album_vacio: 'Aquest cel encara no té constel·lacions.', descargando: (i, n) => `Preparant la descàrrega… ${i} de ${n}`, descarga_lista: 'Descàrrega a punt. El fitxer index.html del ZIP s’obre sense internet.', guardar_cielo: 'Desa el cel', carta_titulo: 'Carta celeste', carta_desc: 'Imprimeix o desa en PDF el mapa d’aquest cel, amb el sol i els núvols que tinguis triats ara.', contenido_titulo: 'Tot el contingut', contenido_desc: 'Un ZIP amb les frases, fotos, àudios i vídeos, i un diari que s’obre sense internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constel·lació' : n + ' constel·lacions'}, ${m < 1 ? 'menys d’1 MB' : 'uns ' + Math.round(m) + ' MB'})`, dormido: 'El cel està adormit: el projecte de Supabase es posa en pausa després d’una setmana sense ús. Cal reactivar-lo des del tauler de Supabase i tornar a carregar la pàgina.', en_partes: (n) => `, en ${n} parts`, parte_titulo: (i, n) => `Part ${i} de ${n}`, parte_archivo: 'part', de_archivo: 'de', menos_1mb: 'menys d’1 MB', unos_mb: (m) => `uns ${m} MB`, descargada: '✓ Descarregada', parte_lista: (i, n) => `Part ${i} de ${n} descarregada.`, partes_intro: 'Aquest cel és gran, així que es descarrega en parts. Toca cada una per descarregar-la; a cada ZIP hi ha un diari amb el seu contingut.', bloqueado: 'Massa intents amb una contrasenya incorrecta. Espera 10 minuts i torna-ho a provar.', nota_sol: 'S’imprimeix amb el sol i els núvols que tinguis triats ara. Per canviar-los, tanca-la i fes servir l’hora i els núvols de dalt a la dreta.', derechos: 'Tots els drets reservats', transcripcion: 'Transcripció', transcripcion_ph: 'Transcripció (opcional): escriu o enganxa el que es diu', transcripcion_ph_grabar: 'Transcripció: parla i apareixerà aquí. Després la pots corregir.', leer_transcripcion: 'Llegeix la transcripció', toca_entrar: 'Toca per entrar', clic_entrar: 'Fes clic per entrar', guardar_postal: 'Desa la postal', formato: 'Format', horizontal: 'Horitzontal', vertical: 'Vertical', nota_postal: 'S’imprimeix en A6 (10,5 × 14,8 cm), la mida d’una postal. A la finestra d’imprimir la pots desar com a PDF.', postal_pie: 'NÓSTOS · POSTAL', locale: 'ca-ES', idioma: 'Idioma',
+    album: 'Àlbum', album_vacio: 'Aquest cel encara no té constel·lacions.', descargando: (i, n) => `Preparant la descàrrega… ${i} de ${n}`, descarga_lista: 'Descàrrega a punt. El fitxer index.html del ZIP s’obre sense internet.', guardar_cielo: 'Desa el cel', carta_titulo: 'Carta celeste', carta_desc: 'Imprimeix o desa en PDF el mapa d’aquest cel, amb el sol i els núvols que tinguis triats ara.', contenido_titulo: 'Tot el contingut', contenido_desc: 'Un ZIP amb les frases, fotos, àudios i vídeos, i un diari que s’obre sense internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constel·lació' : n + ' constel·lacions'}, ${m < 1 ? 'menys d’1 MB' : 'uns ' + Math.round(m) + ' MB'})`, dormido: 'El cel està adormit: el projecte de Supabase es posa en pausa després d’una setmana sense ús. Cal reactivar-lo des del tauler de Supabase i tornar a carregar la pàgina.', en_partes: (n) => `, en ${n} parts`, parte_titulo: (i, n) => `Part ${i} de ${n}`, parte_archivo: 'part', de_archivo: 'de', menos_1mb: 'menys d’1 MB', unos_mb: (m) => `uns ${m} MB`, descargada: '✓ Descarregada', parte_lista: (i, n) => `Part ${i} de ${n} descarregada.`, partes_intro: 'Aquest cel és gran, així que es descarrega en parts. Toca cada una per descarregar-la; a cada ZIP hi ha un diari amb el seu contingut.', bloqueado: 'Massa intents amb una contrasenya incorrecta. Espera 10 minuts i torna-ho a provar.', nota_sol: 'S’imprimeix amb el sol i els núvols que tinguis triats ara. Per canviar-los, tanca-la i fes servir l’hora i els núvols de dalt a la dreta.', derechos: 'Tots els drets reservats', transcripcion: 'Transcripció', transcripcion_ph: 'Transcripció (opcional): escriu o enganxa el que es diu', transcripcion_ph_grabar: 'Transcripció: parla i apareixerà aquí. Després la pots corregir.', leer_transcripcion: 'Llegeix la transcripció', toca_entrar: 'Toca per entrar', clic_entrar: 'Fes clic per entrar', guardar_postal: 'Desa la postal', formato: 'Format', horizontal: 'Horitzontal', vertical: 'Vertical', nota_postal: '«Imprimeix» la treu en A6 (10,5 × 14,8 cm), la mida d’una postal, o com a PDF. «Desa la imatge» crea un PNG per compartir-la o desar-la a les teves fotos.', postal_pie: 'NÓSTOS · POSTAL', guardar_imagen: 'Desa la imatge', preparando_imagen: 'Preparant…', imagen_lista: 'Imatge desada.', imagen_fallo: 'No s’ha pogut crear la imatge. Prova amb «Imprimeix» → «Desa com a PDF».', nombre_carta: 'carta celeste', nombre_postal: 'postal', locale: 'ca-ES', idioma: 'Idioma',
     entrar_modo: 'Entrar en un cel', crear_modo: 'Crear un cel', entrar_o_crear: 'Entrar o crear',
     nombre_cielo: 'Nom del cel', contrasena: 'Contrasenya',
     mostrar_clave: 'Mostra la contrasenya', ocultar_clave: 'Amaga la contrasenya', repite: 'Repeteix la contrasenya',
@@ -920,13 +922,13 @@ const TEXTOS = {
     n_const: (n) => n === 1 ? '1 constellation' : `${n} constellations`,
     cielo_vacio_fecha: 'On that day the sky was still empty.', fecha_futura: 'That date hasn’t come yet: the sky stays on today.',
     fecha_no_valida: 'I don’t recognise that date. Try “12 August 2025”, “August 2025” or “2025”.',
-    fecha_boton: 'Date', hora_nubes: 'Time and clouds', imprimir_carta: 'Print the star chart', estilo_carta: 'Style', oscura: 'Dark', clara: 'Light', imprimir: 'Print', nota_carta: 'In the print window you can choose A4 or A3, or save it as a PDF.', cardinales: ['N', 'E', 'S', 'W'], cambiar_nombre: 'Rename the sky', nombre_nuevo: 'New sky name', guardar: 'Save', si_cambiar: 'Yes, rename', seguro_nombre: (n) => `Are you sure you want to call it “${n}”? Everyone else will need this name to enter from another device.`, nombre_cambiado: (n) => `The sky is now called “${n}”.`, nombre_ocupado: 'Another sky already uses that name. Choose another.', falta_sql_nombre: 'This option still needs to be enabled in Supabase (run the Step 15 SQL).', carta_pie: 'Star chart', sobre: 'About Nóstos', cerrar: 'Close', volver_cara: '↺ Back',
+    fecha_boton: 'Date', hora_nubes: 'Time and clouds', imprimir_carta: 'Print the star chart', estilo_carta: 'Style', oscura: 'Dark', clara: 'Light', imprimir: 'Print', nota_carta: 'In the print window you can choose A4 or A3, or save it as a PDF. «Save image» creates a PNG to share or keep in your photos.', cardinales: ['N', 'E', 'S', 'W'], cambiar_nombre: 'Rename the sky', nombre_nuevo: 'New sky name', guardar: 'Save', si_cambiar: 'Yes, rename', seguro_nombre: (n) => `Are you sure you want to call it “${n}”? Everyone else will need this name to enter from another device.`, nombre_cambiado: (n) => `The sky is now called “${n}”.`, nombre_ocupado: 'Another sky already uses that name. Choose another.', falta_sql_nombre: 'This option still needs to be enabled in Supabase (run the Step 15 SQL).', carta_pie: 'Star chart', sobre: 'About Nóstos', cerrar: 'Close', volver_cara: '↺ Back',
     ayuda_sub: 'coming home', secreto_pregunta: 'What if the shapes meant something?',
     ayuda_p1: 'The Greeks called the journey home nóstos. This sky exists for exactly that: so that people who love each other have a place to come back to. What you say to each other, in words, images or voice, stays here as a constellation.',
     ayuda_p2: 'There’s no hurry. Look slowly:\nwhat shines, opens.',
     secreto_titulo: 'No shape is an accident', secreto_pie: 'Listen: each one sounds different.',
     leyenda: [['Joy', 'opens.'], ['Nostalgia', 'returns, never arriving.'], ['Calm', 'lies down.'], ['Love', 'closes on itself.'], ['Energy', 'rises.'], ['Sadness', 'falls, and fades at the end.'], ['No tone', 'finds its own way.'], ['Two at once', 'hold hands.']],
-    album: 'Album', album_vacio: 'This sky has no constellations yet.', descargando: (i, n) => `Preparing the download… ${i} of ${n}`, descarga_lista: 'Download ready. The index.html file in the ZIP opens without internet.', guardar_cielo: 'Save the sky', carta_titulo: 'Star chart', carta_desc: 'Print this sky’s map or save it as a PDF, with the sun and clouds you have chosen right now.', contenido_titulo: 'Everything', contenido_desc: 'A ZIP with the phrases, photos, audio and videos, plus a journal that opens without internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constellation' : n + ' constellations'}, ${m < 1 ? 'under 1 MB' : 'about ' + Math.round(m) + ' MB'})`, dormido: 'The sky is asleep: the Supabase project pauses after a week without use. Reactivate it from the Supabase dashboard and reload the page.', en_partes: (n) => `, in ${n} parts`, parte_titulo: (i, n) => `Part ${i} of ${n}`, parte_archivo: 'part', de_archivo: 'of', menos_1mb: 'under 1 MB', unos_mb: (m) => `about ${m} MB`, descargada: '✓ Downloaded', parte_lista: (i, n) => `Part ${i} of ${n} downloaded.`, partes_intro: 'This sky is large, so it downloads in parts. Tap each one to download it; every ZIP has a journal with its own content.', bloqueado: 'Too many attempts with a wrong password. Wait 10 minutes and try again.', nota_sol: 'It prints with the sun and clouds you have chosen right now. To change them, close this and use the time and clouds at the top right.', derechos: 'All rights reserved', transcripcion: 'Transcript', transcripcion_ph: 'Transcript (optional): type or paste what is said', transcripcion_ph_grabar: 'Transcript: speak and it will appear here. You can correct it afterwards.', leer_transcripcion: 'Read the transcript', toca_entrar: 'Tap to enter', clic_entrar: 'Click to enter', guardar_postal: 'Save postcard', formato: 'Format', horizontal: 'Landscape', vertical: 'Portrait', nota_postal: 'It prints on A6 (10.5 × 14.8 cm), the size of a postcard. In the print window you can save it as a PDF.', postal_pie: 'NÓSTOS · POSTCARD', locale: 'en-GB', idioma: 'Language',
+    album: 'Album', album_vacio: 'This sky has no constellations yet.', descargando: (i, n) => `Preparing the download… ${i} of ${n}`, descarga_lista: 'Download ready. The index.html file in the ZIP opens without internet.', guardar_cielo: 'Save the sky', carta_titulo: 'Star chart', carta_desc: 'Print this sky’s map or save it as a PDF, with the sun and clouds you have chosen right now.', contenido_titulo: 'Everything', contenido_desc: 'A ZIP with the phrases, photos, audio and videos, plus a journal that opens without internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constellation' : n + ' constellations'}, ${m < 1 ? 'under 1 MB' : 'about ' + Math.round(m) + ' MB'})`, dormido: 'The sky is asleep: the Supabase project pauses after a week without use. Reactivate it from the Supabase dashboard and reload the page.', en_partes: (n) => `, in ${n} parts`, parte_titulo: (i, n) => `Part ${i} of ${n}`, parte_archivo: 'part', de_archivo: 'of', menos_1mb: 'under 1 MB', unos_mb: (m) => `about ${m} MB`, descargada: '✓ Downloaded', parte_lista: (i, n) => `Part ${i} of ${n} downloaded.`, partes_intro: 'This sky is large, so it downloads in parts. Tap each one to download it; every ZIP has a journal with its own content.', bloqueado: 'Too many attempts with a wrong password. Wait 10 minutes and try again.', nota_sol: 'It prints with the sun and clouds you have chosen right now. To change them, close this and use the time and clouds at the top right.', derechos: 'All rights reserved', transcripcion: 'Transcript', transcripcion_ph: 'Transcript (optional): type or paste what is said', transcripcion_ph_grabar: 'Transcript: speak and it will appear here. You can correct it afterwards.', leer_transcripcion: 'Read the transcript', toca_entrar: 'Tap to enter', clic_entrar: 'Click to enter', guardar_postal: 'Save postcard', formato: 'Format', horizontal: 'Landscape', vertical: 'Portrait', nota_postal: '«Print» gives you A6 (10.5 × 14.8 cm), the size of a postcard, or a PDF. «Save image» creates a PNG to share or keep in your photos.', postal_pie: 'NÓSTOS · POSTCARD', guardar_imagen: 'Save image', preparando_imagen: 'Preparing…', imagen_lista: 'Image saved.', imagen_fallo: 'The image couldn’t be created. Try «Print» → «Save as PDF».', nombre_carta: 'star chart', nombre_postal: 'postcard', locale: 'en-GB', idioma: 'Language',
     entrar_modo: 'Enter a sky', crear_modo: 'Create a sky', entrar_o_crear: 'Enter or create',
     nombre_cielo: 'Sky name', contrasena: 'Password',
     mostrar_clave: 'Show password', ocultar_clave: 'Hide password', repite: 'Repeat the password',
@@ -4563,6 +4565,84 @@ dialogoPostal.querySelector('.imprimir-postal').addEventListener('click', async 
   setTimeout(() => window.print(), 80);
 });
 alCambiarIdioma.push(() => { if (!dialogoPostal.hidden) pintarVistaPostal(); });
+
+// ── Guardar como imagen PNG (Paso 22) ────────────────────────
+// La misma lámina de la vista previa, convertida en PNG dentro del navegador. Las imágenes
+// (foto, fotograma, cielo) y la tipografía Manrope van dentro, para que salga idéntica.
+const FUENTES_MANROPE = {};
+async function manropeEnSVG() {
+  const pesos = [300, 400, 500, 600, 700];
+  const reglas = await Promise.all(pesos.map(async (p) => {
+    if (!FUENTES_MANROPE[p]) {
+      const r = await fetch(`https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.3.0/files/manrope-latin-${p}-normal.woff2`);
+      FUENTES_MANROPE[p] = await aDataURL(await r.blob());
+    }
+    return `@font-face{font-family:'Manrope';font-weight:${p};src:url(${FUENTES_MANROPE[p]}) format('woff2');}`;
+  }));
+  return `<style>${reglas.join('')}</style>`;
+}
+function aDataURL(blob) {
+  return new Promise((ok, mal) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = mal; r.readAsDataURL(blob); });
+}
+async function svgAPng(svg, anchoPx) {
+  // 1. Imágenes de fuera (la foto firmada) → dentro del SVG
+  const externas = [...new Set([...svg.matchAll(/href="(?!data:)([^"]+)"/g)].map(m => m[1]))];
+  for (const url of externas) {
+    try { const datos = await aDataURL(await (await fetch(url.replace(/&amp;/g, '&'))).blob()); svg = svg.split(`href="${url}"`).join(`href="${datos}"`); } catch { /* sin esa imagen */ }
+  }
+  // 2. La tipografía
+  try { svg = svg.replace(/(<svg[^>]*>)/, `$1${await manropeEnSVG()}`); } catch { /* con la del sistema */ }
+  // 3. Dibujar en un lienzo y sacar el PNG
+  const [, , W, H] = svg.match(/viewBox="([\d.\s]+)"/)[1].trim().split(/\s+/).map(Number);
+  const escala = anchoPx / W;
+  const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+  try {
+    const im = new Image();
+    await new Promise((ok, mal) => { im.onload = ok; im.onerror = mal; im.src = url; });
+    const c = document.createElement('canvas');
+    c.width = Math.round(W * escala); c.height = Math.round(H * escala);
+    const x = c.getContext('2d');
+    x.drawImage(im, 0, 0, c.width, c.height);
+    return await new Promise((ok) => c.toBlob(ok, 'image/png'));
+  } finally { URL.revokeObjectURL(url); }
+}
+function nombreArchivo(tipo) {
+  const limpio = (cieloActual?.nombre || 'cielo').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9 _.-]+/g, '').replace(/\s+/g, ' ').trim() || 'cielo';
+  return `Nostos - ${limpio} - ${tipo} - ${hoyIso()}.png`;
+}
+// En el móvil se abre la hoja de compartir («Guardar imagen» la lleva a Fotos); en el ordenador, se descarga
+async function entregarImagen(blob, nombre) {
+  const archivo = new File([blob], nombre, { type: 'image/png' });
+  if (window.matchMedia('(pointer: coarse)').matches && navigator.canShare?.({ files: [archivo] })) {
+    try { await navigator.share({ files: [archivo] }); return; }
+    catch (e) { if (e?.name === 'AbortError') return; }           // la persona cerró la hoja: no pasa nada
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = nombre;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+}
+async function guardarImagen(boton, hacerSVG, anchoPx, tipo) {
+  if (boton.disabled) return;
+  const texto = boton.textContent;
+  boton.disabled = true; boton.textContent = t('preparando_imagen');
+  try {
+    const blob = await svgAPng(await hacerSVG(), anchoPx);
+    if (!blob) throw new Error('imagen');
+    await entregarImagen(blob, nombreArchivo(tipo));
+    anunciar(t('imagen_lista'));
+  } catch { avisar(t('imagen_fallo'), 6); }
+  finally { boton.disabled = false; boton.textContent = texto; if (boton.offsetParent) boton.focus({ preventScroll: true }); }   // el foco sigue en el diálogo (Esc lo cierra)
+}
+dialogoCarta.querySelector('.imagen-carta').addEventListener('click', (e) =>
+  guardarImagen(e.currentTarget, () => cartaSVG(estiloCarta, fotoDelCielo(1600, 1024)), 3000, t('nombre_carta')));
+dialogoPostal.querySelector('.imagen-postal').addEventListener('click', async (e) => {
+  const k = postalK; if (!k) return;
+  guardarImagen(e.currentTarget, async () => {
+    if ((k.datos.tipo === 'foto' || k.datos.tipo === 'video') && !medioPostal) medioPostal = await prepararMedioPostal(k);
+    return postalSVG(k, estiloCarta, formatoPostal, medioPostal);
+  }, formatoPostal === 'horizontal' ? 1748 : 1240, t('nombre_postal'));       // A6 a 300 ppp
+});
 
 // ── Cambiar el nombre del cielo (Paso 15) ──
 // Cualquiera que haya entrado puede cambiarlo, con un aviso: las demás personas tendrán que usar
