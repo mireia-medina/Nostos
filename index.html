@@ -177,6 +177,8 @@
   #contenido .firma b { color: var(--texto); font-weight: 700; }
   #contenido .acciones { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-top: 1.2rem; }
   #contenido .borrado { font-size: 0.9rem; }
+  #contenido .guardar-postal { gap: 0.45rem; }
+  #contenido .guardar-postal svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
   #contenido .confirmar { display: block; line-height: 1.5; color: var(--texto); padding-top: 0.4rem; }
   #contenido .confirmar .enlace { margin-right: 0.6rem; }
   #contenido [hidden] { display: none !important; }
@@ -444,6 +446,16 @@
   #dialogo-carta .vista-carta svg { width: 100%; height: 100%; display: block; }
   #dialogo-carta .nota-carta { margin: 0; font-size: 0.82rem; color: var(--texto-2); line-height: 1.45; }
   #dialogo-carta .botones { display: flex; gap: 0.5rem; align-items: center; }
+  #dialogo-postal[hidden] { display: none; }
+  #dialogo-postal { position: fixed; z-index: 21; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(32rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); overflow-y: auto; box-sizing: border-box;
+    padding: 1.4rem 1.4rem 1.1rem; display: flex; flex-direction: column; align-items: center; gap: 0.8rem; text-align: center; }
+  #dialogo-postal h2 { margin: 0; font-size: 1.15rem; font-weight: 700; }
+  #dialogo-postal .vista-postal { width: min(28rem, 100%); aspect-ratio: 148 / 105; border-radius: 6px; overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,0.35); }
+  #dialogo-postal .vista-postal.vertical { width: min(15rem, 62vw); aspect-ratio: 105 / 148; }
+  #dialogo-postal .vista-postal svg { width: 100%; height: 100%; display: block; }
+  #dialogo-postal .nota-carta { margin: 0; font-size: 0.82rem; color: var(--texto-2); line-height: 1.45; }
+  #dialogo-postal .botones { display: flex; gap: 0.5rem; align-items: center; }
   #carta-impresion { display: none; }
   @media print {
     @page { margin: 0; }
@@ -563,6 +575,7 @@
   <p class="firma"></p>
   <div class="acciones">
     <button id="volver" type="button" class="boton" data-t="volver">Volver al cielo</button>
+    <button type="button" class="boton guardar-postal" aria-haspopup="dialog"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2.5v8.5M5.5 7.5 9 11l3.5-3.5"/><path d="M3 12v3h12v-3"/></svg><span data-t="guardar_postal">Guardar postal</span></button>
     <span class="borrado" hidden>
       <button type="button" class="enlace pedir" data-t="borrar">Borrar</button>
     </span>
@@ -687,6 +700,23 @@
   </div>
 </div>
 <div id="carta-impresion" aria-hidden="true"></div>
+<div id="dialogo-postal" class="cristal" role="dialog" aria-modal="true" aria-labelledby="titulo-postal" hidden>
+  <h2 id="titulo-postal" data-t="guardar_postal">Guardar postal</h2>
+  <div class="vista-postal" aria-hidden="true"></div>
+  <div class="estilo-postal segmentos" role="radiogroup" data-t-aria="estilo_carta" aria-label="Estilo">
+    <button type="button" data-estilo="oscura" role="radio" aria-checked="true" data-t="oscura">Oscura</button>
+    <button type="button" data-estilo="clara" role="radio" aria-checked="false" data-t="clara">Clara</button>
+  </div>
+  <div class="formato-postal segmentos" role="radiogroup" data-t-aria="formato" aria-label="Formato">
+    <button type="button" data-formato="horizontal" role="radio" aria-checked="true" data-t="horizontal">Horizontal</button>
+    <button type="button" data-formato="vertical" role="radio" aria-checked="false" data-t="vertical">Vertical</button>
+  </div>
+  <p class="nota-carta" data-t="nota_postal">Se imprime en A6 (10,5 × 14,8 cm), la medida de una postal. En la ventana de imprimir puedes guardarla como PDF.</p>
+  <div class="botones">
+    <button type="button" class="boton principal imprimir-postal" data-t="imprimir">Imprimir</button>
+    <button type="button" class="enlace cancelar" data-t="cancelar">Cancelar</button>
+  </div>
+</div>
 <div id="dialogo-guardar" class="cristal" role="dialog" aria-modal="true" aria-labelledby="titulo-guardar" hidden>
   <h2 id="titulo-guardar" data-t="guardar_cielo">Guardar el cielo</h2>
   <button type="button" class="opcion opcion-carta">
@@ -768,7 +798,7 @@ const TEXTOS = {
     ayuda_p2: 'No hay prisa. Mira despacio:\nlo que brilla, se abre.',
     secreto_titulo: 'Ninguna forma es casual', secreto_pie: 'Escúchalas: cada una suena distinto.',
     leyenda: [['Alegría', 'se abre.'], ['Nostalgia', 'vuelve, sin llegar.'], ['Calma', 'se tiende.'], ['Amor', 'se cierra sobre sí.'], ['Energía', 'sube.'], ['Tristeza', 'cae, y se apaga al final.'], ['Sin tono', 'busca su camino.'], ['Dos a la vez', 'se dan la mano.']],
-    album: 'Álbum', album_vacio: 'Este cielo aún no tiene constelaciones.', descargando: (i, n) => `Preparando la descarga… ${i} de ${n}`, descarga_lista: 'Descarga lista. El archivo index.html del ZIP se abre sin internet.', guardar_cielo: 'Guardar el cielo', carta_titulo: 'Carta celeste', carta_desc: 'Imprime o guarda en PDF el mapa de este cielo, con el sol y las nubes que tengas elegidos ahora.', contenido_titulo: 'Todo el contenido', contenido_desc: 'Un ZIP con las frases, fotos, audios y vídeos, y un diario que se abre sin internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constelación' : n + ' constelaciones'}, ${m < 1 ? 'menos de 1 MB' : 'unos ' + Math.round(m) + ' MB'})`, dormido: 'El cielo está dormido: el proyecto de Supabase se pausa tras una semana sin uso. Hay que reactivarlo desde el panel de Supabase y volver a cargar la página.', en_partes: (n) => `, en ${n} partes`, parte_titulo: (i, n) => `Parte ${i} de ${n}`, parte_archivo: 'parte', de_archivo: 'de', menos_1mb: 'menos de 1 MB', unos_mb: (m) => `unos ${m} MB`, descargada: '✓ Descargada', parte_lista: (i, n) => `Parte ${i} de ${n} descargada.`, partes_intro: 'Este cielo es grande, así que se descarga en partes. Toca cada una para descargarla; en cada ZIP hay un diario con lo suyo.', bloqueado: 'Demasiados intentos con una contraseña incorrecta. Espera 10 minutos y vuelve a probar.', nota_sol: 'Se imprime con el sol y las nubes que tengas elegidos ahora. Para cambiarlos, ciérrala y usa la hora y las nubes de arriba a la derecha.', derechos: 'Todos los derechos reservados', transcripcion: 'Transcripción', transcripcion_ph: 'Transcripción (opcional): escribe o pega lo que se dice', transcripcion_ph_grabar: 'Transcripción: habla y aparecerá aquí. Después puedes corregirla.', leer_transcripcion: 'Leer la transcripción', toca_entrar: 'Toca para entrar', clic_entrar: 'Haz clic para entrar', locale: 'es-ES', idioma: 'Idioma',
+    album: 'Álbum', album_vacio: 'Este cielo aún no tiene constelaciones.', descargando: (i, n) => `Preparando la descarga… ${i} de ${n}`, descarga_lista: 'Descarga lista. El archivo index.html del ZIP se abre sin internet.', guardar_cielo: 'Guardar el cielo', carta_titulo: 'Carta celeste', carta_desc: 'Imprime o guarda en PDF el mapa de este cielo, con el sol y las nubes que tengas elegidos ahora.', contenido_titulo: 'Todo el contenido', contenido_desc: 'Un ZIP con las frases, fotos, audios y vídeos, y un diario que se abre sin internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constelación' : n + ' constelaciones'}, ${m < 1 ? 'menos de 1 MB' : 'unos ' + Math.round(m) + ' MB'})`, dormido: 'El cielo está dormido: el proyecto de Supabase se pausa tras una semana sin uso. Hay que reactivarlo desde el panel de Supabase y volver a cargar la página.', en_partes: (n) => `, en ${n} partes`, parte_titulo: (i, n) => `Parte ${i} de ${n}`, parte_archivo: 'parte', de_archivo: 'de', menos_1mb: 'menos de 1 MB', unos_mb: (m) => `unos ${m} MB`, descargada: '✓ Descargada', parte_lista: (i, n) => `Parte ${i} de ${n} descargada.`, partes_intro: 'Este cielo es grande, así que se descarga en partes. Toca cada una para descargarla; en cada ZIP hay un diario con lo suyo.', bloqueado: 'Demasiados intentos con una contraseña incorrecta. Espera 10 minutos y vuelve a probar.', nota_sol: 'Se imprime con el sol y las nubes que tengas elegidos ahora. Para cambiarlos, ciérrala y usa la hora y las nubes de arriba a la derecha.', derechos: 'Todos los derechos reservados', transcripcion: 'Transcripción', transcripcion_ph: 'Transcripción (opcional): escribe o pega lo que se dice', transcripcion_ph_grabar: 'Transcripción: habla y aparecerá aquí. Después puedes corregirla.', leer_transcripcion: 'Leer la transcripción', toca_entrar: 'Toca para entrar', clic_entrar: 'Haz clic para entrar', guardar_postal: 'Guardar postal', formato: 'Formato', horizontal: 'Horizontal', vertical: 'Vertical', nota_postal: 'Se imprime en A6 (10,5 × 14,8 cm), la medida de una postal. En la ventana de imprimir puedes guardarla como PDF.', postal_pie: 'NÓSTOS · POSTAL', locale: 'es-ES', idioma: 'Idioma',
     entrar_modo: 'Entrar en un cielo', crear_modo: 'Crear un cielo', entrar_o_crear: 'Entrar o crear',
     nombre_cielo: 'Nombre del cielo', contrasena: 'Contraseña',
     mostrar_clave: 'Mostrar la contraseña', ocultar_clave: 'Ocultar la contraseña', repite: 'Repite la contraseña',
@@ -832,7 +862,7 @@ const TEXTOS = {
     ayuda_p2: 'No hi ha pressa. Mira a poc a poc:\nel que brilla, s’obre.',
     secreto_titulo: 'Cap forma és casual', secreto_pie: 'Escolta-les: cada una sona diferent.',
     leyenda: [['Alegria', 's’obre.'], ['Nostàlgia', 'torna, sense arribar.'], ['Calma', 's’estén.'], ['Amor', 'es tanca sobre si.'], ['Energia', 'puja.'], ['Tristesa', 'cau, i s’apaga al final.'], ['Sense to', 'busca el seu camí.'], ['Dos alhora', 'es donen la mà.']],
-    album: 'Àlbum', album_vacio: 'Aquest cel encara no té constel·lacions.', descargando: (i, n) => `Preparant la descàrrega… ${i} de ${n}`, descarga_lista: 'Descàrrega a punt. El fitxer index.html del ZIP s’obre sense internet.', guardar_cielo: 'Desa el cel', carta_titulo: 'Carta celeste', carta_desc: 'Imprimeix o desa en PDF el mapa d’aquest cel, amb el sol i els núvols que tinguis triats ara.', contenido_titulo: 'Tot el contingut', contenido_desc: 'Un ZIP amb les frases, fotos, àudios i vídeos, i un diari que s’obre sense internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constel·lació' : n + ' constel·lacions'}, ${m < 1 ? 'menys d’1 MB' : 'uns ' + Math.round(m) + ' MB'})`, dormido: 'El cel està adormit: el projecte de Supabase es posa en pausa després d’una setmana sense ús. Cal reactivar-lo des del tauler de Supabase i tornar a carregar la pàgina.', en_partes: (n) => `, en ${n} parts`, parte_titulo: (i, n) => `Part ${i} de ${n}`, parte_archivo: 'part', de_archivo: 'de', menos_1mb: 'menys d’1 MB', unos_mb: (m) => `uns ${m} MB`, descargada: '✓ Descarregada', parte_lista: (i, n) => `Part ${i} de ${n} descarregada.`, partes_intro: 'Aquest cel és gran, així que es descarrega en parts. Toca cada una per descarregar-la; a cada ZIP hi ha un diari amb el seu contingut.', bloqueado: 'Massa intents amb una contrasenya incorrecta. Espera 10 minuts i torna-ho a provar.', nota_sol: 'S’imprimeix amb el sol i els núvols que tinguis triats ara. Per canviar-los, tanca-la i fes servir l’hora i els núvols de dalt a la dreta.', derechos: 'Tots els drets reservats', transcripcion: 'Transcripció', transcripcion_ph: 'Transcripció (opcional): escriu o enganxa el que es diu', transcripcion_ph_grabar: 'Transcripció: parla i apareixerà aquí. Després la pots corregir.', leer_transcripcion: 'Llegeix la transcripció', toca_entrar: 'Toca per entrar', clic_entrar: 'Fes clic per entrar', locale: 'ca-ES', idioma: 'Idioma',
+    album: 'Àlbum', album_vacio: 'Aquest cel encara no té constel·lacions.', descargando: (i, n) => `Preparant la descàrrega… ${i} de ${n}`, descarga_lista: 'Descàrrega a punt. El fitxer index.html del ZIP s’obre sense internet.', guardar_cielo: 'Desa el cel', carta_titulo: 'Carta celeste', carta_desc: 'Imprimeix o desa en PDF el mapa d’aquest cel, amb el sol i els núvols que tinguis triats ara.', contenido_titulo: 'Tot el contingut', contenido_desc: 'Un ZIP amb les frases, fotos, àudios i vídeos, i un diari que s’obre sense internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constel·lació' : n + ' constel·lacions'}, ${m < 1 ? 'menys d’1 MB' : 'uns ' + Math.round(m) + ' MB'})`, dormido: 'El cel està adormit: el projecte de Supabase es posa en pausa després d’una setmana sense ús. Cal reactivar-lo des del tauler de Supabase i tornar a carregar la pàgina.', en_partes: (n) => `, en ${n} parts`, parte_titulo: (i, n) => `Part ${i} de ${n}`, parte_archivo: 'part', de_archivo: 'de', menos_1mb: 'menys d’1 MB', unos_mb: (m) => `uns ${m} MB`, descargada: '✓ Descarregada', parte_lista: (i, n) => `Part ${i} de ${n} descarregada.`, partes_intro: 'Aquest cel és gran, així que es descarrega en parts. Toca cada una per descarregar-la; a cada ZIP hi ha un diari amb el seu contingut.', bloqueado: 'Massa intents amb una contrasenya incorrecta. Espera 10 minuts i torna-ho a provar.', nota_sol: 'S’imprimeix amb el sol i els núvols que tinguis triats ara. Per canviar-los, tanca-la i fes servir l’hora i els núvols de dalt a la dreta.', derechos: 'Tots els drets reservats', transcripcion: 'Transcripció', transcripcion_ph: 'Transcripció (opcional): escriu o enganxa el que es diu', transcripcion_ph_grabar: 'Transcripció: parla i apareixerà aquí. Després la pots corregir.', leer_transcripcion: 'Llegeix la transcripció', toca_entrar: 'Toca per entrar', clic_entrar: 'Fes clic per entrar', guardar_postal: 'Desa la postal', formato: 'Format', horizontal: 'Horitzontal', vertical: 'Vertical', nota_postal: 'S’imprimeix en A6 (10,5 × 14,8 cm), la mida d’una postal. A la finestra d’imprimir la pots desar com a PDF.', postal_pie: 'NÓSTOS · POSTAL', locale: 'ca-ES', idioma: 'Idioma',
     entrar_modo: 'Entrar en un cel', crear_modo: 'Crear un cel', entrar_o_crear: 'Entrar o crear',
     nombre_cielo: 'Nom del cel', contrasena: 'Contrasenya',
     mostrar_clave: 'Mostra la contrasenya', ocultar_clave: 'Amaga la contrasenya', repite: 'Repeteix la contrasenya',
@@ -896,7 +926,7 @@ const TEXTOS = {
     ayuda_p2: 'There’s no hurry. Look slowly:\nwhat shines, opens.',
     secreto_titulo: 'No shape is an accident', secreto_pie: 'Listen: each one sounds different.',
     leyenda: [['Joy', 'opens.'], ['Nostalgia', 'returns, never arriving.'], ['Calm', 'lies down.'], ['Love', 'closes on itself.'], ['Energy', 'rises.'], ['Sadness', 'falls, and fades at the end.'], ['No tone', 'finds its own way.'], ['Two at once', 'hold hands.']],
-    album: 'Album', album_vacio: 'This sky has no constellations yet.', descargando: (i, n) => `Preparing the download… ${i} of ${n}`, descarga_lista: 'Download ready. The index.html file in the ZIP opens without internet.', guardar_cielo: 'Save the sky', carta_titulo: 'Star chart', carta_desc: 'Print this sky’s map or save it as a PDF, with the sun and clouds you have chosen right now.', contenido_titulo: 'Everything', contenido_desc: 'A ZIP with the phrases, photos, audio and videos, plus a journal that opens without internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constellation' : n + ' constellations'}, ${m < 1 ? 'under 1 MB' : 'about ' + Math.round(m) + ' MB'})`, dormido: 'The sky is asleep: the Supabase project pauses after a week without use. Reactivate it from the Supabase dashboard and reload the page.', en_partes: (n) => `, in ${n} parts`, parte_titulo: (i, n) => `Part ${i} of ${n}`, parte_archivo: 'part', de_archivo: 'of', menos_1mb: 'under 1 MB', unos_mb: (m) => `about ${m} MB`, descargada: '✓ Downloaded', parte_lista: (i, n) => `Part ${i} of ${n} downloaded.`, partes_intro: 'This sky is large, so it downloads in parts. Tap each one to download it; every ZIP has a journal with its own content.', bloqueado: 'Too many attempts with a wrong password. Wait 10 minutes and try again.', nota_sol: 'It prints with the sun and clouds you have chosen right now. To change them, close this and use the time and clouds at the top right.', derechos: 'All rights reserved', transcripcion: 'Transcript', transcripcion_ph: 'Transcript (optional): type or paste what is said', transcripcion_ph_grabar: 'Transcript: speak and it will appear here. You can correct it afterwards.', leer_transcripcion: 'Read the transcript', toca_entrar: 'Tap to enter', clic_entrar: 'Click to enter', locale: 'en-GB', idioma: 'Language',
+    album: 'Album', album_vacio: 'This sky has no constellations yet.', descargando: (i, n) => `Preparing the download… ${i} of ${n}`, descarga_lista: 'Download ready. The index.html file in the ZIP opens without internet.', guardar_cielo: 'Save the sky', carta_titulo: 'Star chart', carta_desc: 'Print this sky’s map or save it as a PDF, with the sun and clouds you have chosen right now.', contenido_titulo: 'Everything', contenido_desc: 'A ZIP with the phrases, photos, audio and videos, plus a journal that opens without internet.', tam_zip: (m, n) => `(${n === 1 ? '1 constellation' : n + ' constellations'}, ${m < 1 ? 'under 1 MB' : 'about ' + Math.round(m) + ' MB'})`, dormido: 'The sky is asleep: the Supabase project pauses after a week without use. Reactivate it from the Supabase dashboard and reload the page.', en_partes: (n) => `, in ${n} parts`, parte_titulo: (i, n) => `Part ${i} of ${n}`, parte_archivo: 'part', de_archivo: 'of', menos_1mb: 'under 1 MB', unos_mb: (m) => `about ${m} MB`, descargada: '✓ Downloaded', parte_lista: (i, n) => `Part ${i} of ${n} downloaded.`, partes_intro: 'This sky is large, so it downloads in parts. Tap each one to download it; every ZIP has a journal with its own content.', bloqueado: 'Too many attempts with a wrong password. Wait 10 minutes and try again.', nota_sol: 'It prints with the sun and clouds you have chosen right now. To change them, close this and use the time and clouds at the top right.', derechos: 'All rights reserved', transcripcion: 'Transcript', transcripcion_ph: 'Transcript (optional): type or paste what is said', transcripcion_ph_grabar: 'Transcript: speak and it will appear here. You can correct it afterwards.', leer_transcripcion: 'Read the transcript', toca_entrar: 'Tap to enter', clic_entrar: 'Click to enter', guardar_postal: 'Save postcard', formato: 'Format', horizontal: 'Landscape', vertical: 'Portrait', nota_postal: 'It prints on A6 (10.5 × 14.8 cm), the size of a postcard. In the print window you can save it as a PDF.', postal_pie: 'NÓSTOS · POSTCARD', locale: 'en-GB', idioma: 'Language',
     entrar_modo: 'Enter a sky', crear_modo: 'Create a sky', entrar_o_crear: 'Enter or create',
     nombre_cielo: 'Sky name', contrasena: 'Password',
     mostrar_clave: 'Show password', ocultar_clave: 'Hide password', repite: 'Repeat the password',
@@ -3055,6 +3085,7 @@ function llegaNueva(fila, retraso = 0.2) {
 function llegaBorrado(id) {
   const k = constelaciones.find(x => x.registro?.id === id && x.salida === null);
   if (!k) return false;
+  if (postalK === k && !dialogoPostal.hidden) cerrarPostal(false);
   if (k === abierta) cerrarConstelacion();      // la tenías abierta: se cierra con calma
   if (k === enfocada) enfocada = null;
   k.salida = tiempoActual;                      // se apaga despacio
@@ -3458,7 +3489,7 @@ window.addEventListener('keydown', (e) => {
     return;
   }
   const t = e.target;
-  if (t.closest?.('input, textarea, select, #nueva, #entrada, #menu, #dialogo-carta, #dialogo-ayuda, #dialogo-album, #dialogo-guardar')) return;
+  if (t.closest?.('input, textarea, select, #nueva, #entrada, #menu, #dialogo-carta, #dialogo-ayuda, #dialogo-album, #dialogo-guardar, #dialogo-postal')) return;
   if (abierta || !cieloActual || e.altKey || e.ctrlKey || e.metaKey) return;
   const paso = 0.035 * (fov / AJUSTES.campoVision);
   if (e.key === 'ArrowLeft') velG = paso;
@@ -4264,12 +4295,274 @@ dialogoCarta.addEventListener('keydown', (e) => {
   }
 });
 dialogoCarta.querySelector('.imprimir-ya').addEventListener('click', () => {
+  hojaPagina.textContent = '';                                            // la carta: A4, A3… lo que se elija al imprimir
   hojaImpresion.innerHTML = cartaSVG(estiloCarta, fotoDelCielo(1600, 1024));
   hojaImpresion.dataset.estilo = estiloCarta;
   cerrarCarta();
   setTimeout(() => window.print(), 50);
 });
 alCambiarIdioma.push(() => { if (!dialogoCarta.hidden) pintarVistaCarta(); });
+
+// ── Postal de una constelación (Paso 21) ─────────────────────
+// La figura grande con las estrellas reales de su zona, la retícula y el marco de la carta,
+// y al lado (horizontal) o debajo (vertical) su contenido y la firma. Se imprime en A6.
+const dialogoPostal = document.getElementById('dialogo-postal');
+const vistaPostal = dialogoPostal.querySelector('.vista-postal');
+const botonPostal = panel.querySelector('.guardar-postal');
+let formatoPostal = 'horizontal', postalK = null, medioPostal = null, numPostal = 0;
+try { const f = localStorage.getItem('nostos.postal'); if (f === 'horizontal' || f === 'vertical') formatoPostal = f; } catch {}
+
+// Partir un texto en líneas que quepan en un ancho (midiendo con la misma tipografía)
+const medidor = document.createElement('canvas').getContext('2d');
+function partirTexto(texto, ancho, tam, peso = 500) {
+  medidor.font = `${peso} ${tam}px Manrope, system-ui, sans-serif`;
+  const lineas = [];
+  for (const parrafo of String(texto).split(/\n+/)) {
+    let linea = '';
+    for (const palabra of parrafo.split(/\s+/).filter(Boolean)) {
+      const prueba = linea ? linea + ' ' + palabra : palabra;
+      if (medidor.measureText(prueba).width <= ancho || !linea) linea = prueba;
+      else { lineas.push(linea); linea = palabra; }
+    }
+    if (linea) lineas.push(linea);
+  }
+  return lineas;
+}
+// El tamaño más grande con el que el texto cabe en la caja (las frases largas, más pequeñas)
+function ajustarTexto(texto, ancho, alto, max, min, interlineado = 1.35, peso = 500) {
+  for (let tam = max; tam >= min; tam -= 2) {
+    const lineas = partirTexto(texto, ancho, tam, peso);
+    if (lineas.length * tam * interlineado <= alto) return { lineas, tam };
+  }
+  const lineas = partirTexto(texto, ancho, min, peso), caben = Math.max(1, Math.floor(alto / (min * interlineado)));
+  if (lineas.length > caben) { lineas.length = caben; lineas[caben - 1] = lineas[caben - 1].replace(/\s*\S*$/, '') + '…'; }
+  return { lineas, tam: min };
+}
+function textoSVG(lineas, x, y, tam, interlineado, attrs) {
+  return `<text x="${x}" y="${y}" font-size="${tam}" ${attrs}>${lineas.map((l, i) => `<tspan x="${x}" dy="${i ? tam * interlineado : 0}">${escaparXml(l)}</tspan>`).join('')}</text>`;
+}
+
+// La foto (enlace firmado) o el fotograma del vídeo tal como se ve al abrirlo
+async function prepararMedioPostal(k) {
+  const tipo = k.datos.tipo;
+  if (tipo === 'foto') {
+    if (!k.urlFoto || k.urlFoto.caduca < Date.now()) {
+      const { data, error } = await supabase.storage.from('archivos').createSignedUrl(k.registro.archivo, 3600);
+      if (error) return null;
+      k.urlFoto = { url: data.signedUrl, caduca: Date.now() + 50 * 60 * 1000 };
+    }
+    return await cargarImagen(k.urlFoto.url);
+  }
+  if (tipo === 'video') {
+    const desde = (v) => {
+      try {
+        const c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight;
+        c.getContext('2d').drawImage(v, 0, 0);
+        return { url: c.toDataURL('image/jpeg', 0.9), ancho: c.width, alto: c.height };
+      } catch { return null; }
+    };
+    const enPanel = panelCuerpo.querySelector('video');
+    if (enPanel && enPanel.readyState >= 2 && enPanel.videoWidth) { const r = desde(enPanel); if (r) return r; }
+    try {
+      const { data, error } = await supabase.storage.from('archivos').createSignedUrl(k.registro.archivo, 600);
+      if (error) return null;
+      const v = document.createElement('video');
+      v.crossOrigin = 'anonymous'; v.muted = true; v.playsInline = true; v.preload = 'auto';
+      v.src = data.signedUrl + '#t=0.1';
+      await new Promise((ok, mal) => { v.onloadeddata = ok; v.onerror = mal; setTimeout(mal, 8000); });
+      if (v.currentTime < 0.1) { v.currentTime = 0.1; await new Promise(ok => { v.onseeked = ok; setTimeout(ok, 1500); }); }
+      return desde(v);
+    } catch { return null; }
+  }
+  return null;
+}
+function cargarImagen(url) {
+  return new Promise((ok) => {
+    const im = new Image();
+    im.onload = () => ok({ url, ancho: im.naturalWidth, alto: im.naturalHeight });
+    im.onerror = () => ok(null);
+    im.src = url;
+  });
+}
+
+function postalSVG(k, estilo, formato, medio) {
+  const C = ESTILOS_CARTA[estilo], oscura = estilo === 'oscura';
+  const tinta = oscura ? '#e6ebf5' : '#16213d';
+  const id = 'p' + (++numPostal);
+  const hz = formato === 'horizontal';
+  const W = hz ? 1480 : 1050, H = hz ? 1050 : 1480;
+  const f = (n) => n.toFixed(1);
+  // Zonas: la figura y el contenido
+  const fig = hz ? { x: 74, y: 74, w: 680, h: H - 148 } : { x: 74, y: 74, w: W - 148, h: 660 };
+  const caja = hz ? { x: 820, y: 120, w: W - 820 - 86, h: H - 120 - 250 } : { x: 100, y: 790, w: W - 200, h: 440 };
+  const pieY = hz ? H - 200 : H - 190;
+
+  // Figura: coordenadas propias (grados) + estrellas reales de esa zona del cielo
+  const d = k.datos, centro = k.centro.clone().normalize();
+  const derecha = new THREE.Vector3().crossVectors(centro, ARRIBA).normalize();
+  const arriba = new THREE.Vector3().crossVectors(derecha, centro).normalize();
+  const xs = d.estrellas.map(p => p[0]), ys = d.estrellas.map(p => p[1]);
+  const mx = (Math.min(...xs) + Math.max(...xs)) / 2, my = (Math.min(...ys) + Math.max(...ys)) / 2;
+  const ext = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys), 0.5);
+  const esc = Math.min(fig.w, fig.h) * 0.62 / ext;                  // px por grado: la figura ocupa algo más de la mitad
+  const cx = fig.x + fig.w / 2, cy = fig.y + fig.h / 2;
+  const P = ([gx, gy]) => [cx + (gx - mx) * esc, cy - (gy - my) * esc];
+  const rad = THREE.MathUtils.radToDeg;
+  // centro óptico de la figura en el cielo, para buscar las estrellas de alrededor
+  let fondo = '';
+  const v = new THREE.Vector3(), medioX = fig.w / 2 / esc, medioY = fig.h / 2 / esc;
+  for (let i = 0; i < posiciones.length / 3; i++) {
+    const b = brillos[i];
+    if (b < 0.18) continue;
+    v.set(posiciones[i * 3], posiciones[i * 3 + 1], posiciones[i * 3 + 2]).normalize();
+    const z = v.dot(centro);
+    if (z <= 0.2) continue;
+    const gx = rad(Math.atan2(v.dot(derecha), z)), gy = rad(Math.atan2(v.dot(arriba), z));
+    if (Math.abs(gx - mx) > medioX || Math.abs(gy - my) > medioY) continue;
+    const [x, y] = P([gx, gy]);
+    fondo += `<circle cx="${f(x)}" cy="${f(y)}" r="${f(0.6 + b * 2.4)}" opacity="${f(0.35 + b * 0.6)}"/>`;
+  }
+  // Retícula fina: líneas cada «paso» grados, con un paso redondo según el tamaño de la figura
+  const pasos = [0.5, 1, 2, 5, 10, 15, 20, 30];
+  const paso = pasos.find(p => (fig.w / esc) / p <= 7) || 30;
+  let reticula = '';
+  for (let g = Math.ceil((mx - medioX) / paso) * paso; g <= mx + medioX; g += paso) { const [x] = P([g, 0]); reticula += `<line x1="${f(x)}" y1="${fig.y}" x2="${f(x)}" y2="${fig.y + fig.h}"/>`; }
+  for (let g = Math.ceil((my - medioY) / paso) * paso; g <= my + medioY; g += paso) { const [, y] = P([0, g]); reticula += `<line x1="${fig.x}" y1="${f(y)}" x2="${fig.x + fig.w}" y2="${f(y)}"/>`; }
+  const pts = d.estrellas.map(P);
+  const lineas = k.lineas.map(([a, b]) => `<line x1="${f(pts[a][0])}" y1="${f(pts[a][1])}" x2="${f(pts[b][0])}" y2="${f(pts[b][1])}"/>`).join('');
+  const estrellas = d.estrellas.map(([, , m], i) => `<circle cx="${f(pts[i][0])}" cy="${f(pts[i][1])}" r="${f(m < 0.2 ? 4.5 : 6 + m * 6)}"/>`).join('');
+  const halo = oscura ? d.estrellas.map(([, , m], i) => `<circle cx="${f(pts[i][0])}" cy="${f(pts[i][1])}" r="${f(m < 0.2 ? 12 : 18 + m * 14)}" fill="url(#${id}-brillo)"/>`).join('') : '';
+
+  // Contenido
+  const c = k.contenido;
+  let contenido = '', alto = caja.h;
+  const pieTexto = d.tipo !== 'frase' && c.texto ? ajustarTexto(c.texto, caja.w, 150, 34, 22, 1.35, 600) : null;
+  if (pieTexto) alto -= pieTexto.lineas.length * pieTexto.tam * 1.35 + 36;
+  if (d.tipo === 'frase') {
+    const { lineas: ls, tam } = ajustarTexto(c.texto || '', caja.w, caja.h, 64, 20, 1.32, 500);
+    const altoTexto = ls.length * tam * 1.32;
+    contenido = textoSVG(ls, caja.x, caja.y + (caja.h - altoTexto) / 2 + tam * 0.9, tam, 1.32, `font-weight="500" fill="${C.texto}" letter-spacing="${f(-tam * 0.012)}"`);
+  } else if ((d.tipo === 'foto' || d.tipo === 'video') && medio) {
+    const r = Math.min(caja.w / medio.ancho, alto / medio.alto);
+    const w = medio.ancho * r, h = medio.alto * r;
+    const x = caja.x + (caja.w - w) / 2, y = caja.y + (alto - h) / 2;
+    contenido = `<image href="${medio.url}" x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}" preserveAspectRatio="xMidYMid meet"/>`;
+  } else if (d.tipo === 'video') {
+    // sin fotograma (no se pudo leer el vídeo): un marco con el símbolo de reproducir
+    const w = Math.min(caja.w, alto * 16 / 9), h = w * 9 / 16, x = caja.x + (caja.w - w) / 2, y = caja.y + (alto - h) / 2;
+    contenido = `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}" rx="14" fill="none" stroke="${C.texto}" stroke-width="1.5" opacity="0.5"/>
+      <path d="M${f(x + w / 2 - 22)} ${f(y + h / 2 - 28)} l52 28 l-52 28 z" fill="${C.texto}" opacity="0.6"/>`;
+  } else if (d.tipo === 'audio') {
+    const onda = k.registro?.forma?.onda || Array(64).fill(0.3);
+    const hOnda = Math.min(220, alto * 0.6), n = onda.length, ancho = caja.w / n, y0 = caja.y + alto / 2;
+    contenido = `<g fill="${C.texto}">` + onda.map((val, i) => { const a = Math.max(3, val * hOnda); return `<rect x="${f(caja.x + i * ancho + ancho * 0.28)}" y="${f(y0 - a / 2)}" width="${f(ancho * 0.44)}" height="${f(a)}" rx="${f(ancho * 0.2)}"/>`; }).join('') + `</g>`;
+  }
+  if (pieTexto) {
+    const y = caja.y + alto + 36 + pieTexto.tam * 0.9;
+    contenido += textoSVG(pieTexto.lineas, caja.x, y, pieTexto.tam, 1.35, `font-weight="600" fill="${C.texto}"`);
+  }
+  // Firma
+  const firma = `<text x="${caja.x}" y="${pieY}" font-size="24" fill="${C.suave}"><tspan>${escaparXml(t('anadida_por'))}</tspan><tspan font-weight="700" fill="${C.texto}">${escaparXml(c.autor)}</tspan><tspan> · ${escaparXml(fechaLarga(c.fecha))}</tspan></text>
+    <text x="${caja.x}" y="${pieY + 46}" font-size="28" font-weight="700" fill="${C.texto}" letter-spacing="-0.4">${escaparXml(cieloActual?.nombre || '')}</text>
+    <text x="${caja.x}" y="${pieY + 86}" font-size="15" font-weight="600" fill="${C.suave}" letter-spacing="3.5">${escaparXml(t('postal_pie'))}</text>`;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" font-family="Manrope, system-ui, sans-serif" role="img" aria-label="${escaparXml(t('guardar_postal'))}">
+  <defs>
+    <clipPath id="${id}-fig"><rect x="${fig.x}" y="${fig.y}" width="${fig.w}" height="${fig.h}"/></clipPath>
+    <radialGradient id="${id}-brillo"><stop offset="0" stop-color="#ffffff" stop-opacity="0.35"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="${id}-cielo" cx="0.5" cy="0.45" r="0.75"><stop offset="0" stop-color="#101a33"/><stop offset="1" stop-color="#03050b"/></radialGradient>
+  </defs>
+  <rect width="${W}" height="${H}" fill="${C.papel}"/>
+  <rect x="34" y="34" width="${W - 68}" height="${H - 68}" fill="none" stroke="${C.borde}" stroke-width="0.8" opacity="0.35"/>
+  <rect x="${fig.x}" y="${fig.y}" width="${fig.w}" height="${fig.h}" fill="${oscura ? `url(#${id}-cielo)` : '#ffffff'}"/>
+  <g clip-path="url(#${id}-fig)">
+    <g fill="none" stroke="${tinta}" stroke-width="0.8" opacity="${oscura ? 0.14 : 0.13}">${reticula}</g>
+    <g fill="${tinta}">${fondo}</g>
+    ${halo}
+    ${!oscura ? `<g stroke="#ffffff" stroke-width="7" stroke-linecap="round">${lineas}</g>` : ''}
+    <g stroke="${tinta}" stroke-width="2.2" stroke-linecap="round" opacity="0.9">${lineas}</g>
+    <g fill="${tinta}" ${!oscura ? 'stroke="#ffffff" stroke-width="2.5" paint-order="stroke"' : ''}>${estrellas}</g>
+  </g>
+  <rect x="${fig.x}" y="${fig.y}" width="${fig.w}" height="${fig.h}" fill="none" stroke="${C.borde}" stroke-width="0.9" opacity="0.45"/>
+  ${contenido}
+  ${firma}
+</svg>`;
+}
+
+function pintarVistaPostal() {
+  if (!postalK) return;
+  vistaPostal.classList.toggle('vertical', formatoPostal === 'vertical');
+  vistaPostal.innerHTML = postalSVG(postalK, estiloCarta, formatoPostal, medioPostal);
+  for (const [sel, valor] of [['.estilo-postal', estiloCarta], ['.formato-postal', formatoPostal]]) {
+    dialogoPostal.querySelectorAll(sel + ' button').forEach(b => {
+      const si = (b.dataset.estilo || b.dataset.formato) === valor;
+      b.classList.toggle('activo', si); b.setAttribute('aria-checked', String(si));
+    });
+  }
+}
+async function abrirPostal() {
+  if (!abierta) return;
+  postalK = abierta; medioPostal = null;
+  try { await document.fonts?.load('500 40px Manrope'); await document.fonts?.load('700 40px Manrope'); } catch {}
+  pintarVistaPostal();
+  dialogoPostal.hidden = false; fondoCarta.hidden = false;
+  dialogoPostal.querySelector('.estilo-postal button.activo').focus();
+  if (postalK.datos.tipo === 'foto' || postalK.datos.tipo === 'video') {
+    const k = postalK;
+    const m = await prepararMedioPostal(k);
+    if (postalK === k) { medioPostal = m; pintarVistaPostal(); }
+  }
+}
+function cerrarPostal(devolverFoco = true) {
+  dialogoPostal.hidden = true; fondoCarta.hidden = true;
+  if (devolverFoco && botonPostal.isConnected) botonPostal.focus({ preventScroll: true });
+}
+botonPostal.addEventListener('click', abrirPostal);
+dialogoPostal.querySelector('.cancelar').addEventListener('click', () => cerrarPostal());
+fondoCarta.addEventListener('click', () => { if (!dialogoPostal.hidden) cerrarPostal(); });
+dialogoPostal.querySelectorAll('.estilo-postal button').forEach(b => b.addEventListener('click', () => {
+  estiloCarta = b.dataset.estilo;                                        // el mismo estilo que la carta, y se recuerda
+  try { localStorage.setItem('nostos.carta', estiloCarta); } catch {}
+  pintarVistaPostal();
+}));
+dialogoPostal.querySelectorAll('.formato-postal button').forEach(b => b.addEventListener('click', () => {
+  formatoPostal = b.dataset.formato;
+  try { localStorage.setItem('nostos.postal', formatoPostal); } catch {}
+  pintarVistaPostal();
+}));
+dialogoPostal.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cerrarPostal(); return; }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    const grupo = e.target.closest('.estilo-postal, .formato-postal');
+    if (!grupo) return;
+    e.preventDefault();
+    if (grupo.classList.contains('estilo-postal')) { estiloCarta = estiloCarta === 'oscura' ? 'clara' : 'oscura'; try { localStorage.setItem('nostos.carta', estiloCarta); } catch {} }
+    else { formatoPostal = formatoPostal === 'horizontal' ? 'vertical' : 'horizontal'; try { localStorage.setItem('nostos.postal', formatoPostal); } catch {} }
+    pintarVistaPostal(); grupo.querySelector('button.activo').focus();
+  }
+  if (e.key === 'Tab') {
+    const f = [...dialogoPostal.querySelectorAll('button:not([disabled])')].filter(x => x.offsetParent);
+    const i = f.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0) { e.preventDefault(); f.at(-1).focus(); }
+    else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+  }
+});
+// Tamaño de la hoja al imprimir: A6 para la postal; la carta deja elegir (A4, A3…)
+const hojaPagina = document.createElement('style');
+document.head.appendChild(hojaPagina);
+dialogoPostal.querySelector('.imprimir-postal').addEventListener('click', async () => {
+  const k = postalK;
+  if (!k) return;
+  if ((k.datos.tipo === 'foto' || k.datos.tipo === 'video') && !medioPostal) medioPostal = await prepararMedioPostal(k);
+  hojaImpresion.innerHTML = postalSVG(k, estiloCarta, formatoPostal, medioPostal);
+  hojaImpresion.dataset.estilo = estiloCarta;
+  hojaPagina.textContent = `@media print { @page { size: ${formatoPostal === 'horizontal' ? '148mm 105mm' : '105mm 148mm'}; margin: 0; } }`;
+  cerrarPostal();
+  const img = hojaImpresion.querySelector('image');                     // la foto, cargada antes de imprimir
+  if (img) await cargarImagen(img.getAttribute('href'));
+  setTimeout(() => window.print(), 80);
+});
+alCambiarIdioma.push(() => { if (!dialogoPostal.hidden) pintarVistaPostal(); });
 
 // ── Cambiar el nombre del cielo (Paso 15) ──
 // Cualquiera que haya entrado puede cambiarlo, con un aviso: las demás personas tendrán que usar
